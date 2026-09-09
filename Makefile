@@ -8,10 +8,10 @@ bootstrap:
 	npm ci
 
 engine:
-	sh scripts/build-engine.sh
+	bash scripts/build-engine.sh
 
 native:
-	sh scripts/build-engine.sh native
+	bash scripts/build-engine.sh native
 
 dev: engine
 	npm run dev

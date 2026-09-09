@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -eu
 cd "$(dirname "$0")/.."
 if [ ! -f vendor/engine/src/search.h ]; then

@@ -37,9 +37,10 @@ Technical documentation belongs in this file.
   of git. Native/WASM builds share generated sources; Make disables parallelism.
 - Keep AGENTS.md in scripts/package-source.mjs's allowlist because it contains
   the corresponding-source build instructions.
-- No GitHub remote is configured. README uses repository-relative workflow
-  badge/link URLs; verify rendering once hosted. Do not create a remote or
-  deploy without authorization.
+- GitHub remote is git@github.com:pathikrit/talbot.git; main tracks origin/main.
+- Engine build scripts require Bash: Emscripten's environment script cannot
+  locate its SDK when sourced through Ubuntu's dash (/bin/sh). Keep Make's
+  explicit bash invocation as well as the build script's Bash shebang.
 
 # Talbot
 
