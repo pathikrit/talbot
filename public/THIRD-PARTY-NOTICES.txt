@@ -1,0 +1,47 @@
+TALBOT 0.1.0
+===========
+
+Talbot application and browser adapter: GPL-3.0-only, without warranty.
+Full license: ./licenses/GPL-3.0.txt
+Corresponding source for this build: ./talbot-source.tar.gz
+(The source archive is available in production builds, not the dev server.)
+
+Patricia 5.1 by Adam Kulju
+https://github.com/Adam-Kulju/Patricia
+Pinned revision: f1ee4273c6e6068bd6ec0d53ca91c1c391543f85
+MIT; copyright (c) 2024 Adam Kulju.
+Full license: ./licenses/PATRICIA-LICENSE.txt
+Includes fingolfin.nnue, finarfin.nnue, and feanor.nnue from that revision.
+Talbot modifications: single-thread browser adapter, cooperative Asyncify
+cancellation, portable neural-network embedding and hash indexing, disabled
+filesystem tablebases, legal fallback for an interrupted first iteration,
+and fixed sacrifice-network selection outside endgames. These modifications
+are not endorsed by the upstream author. Engine provenance and network hashes
+are recorded in ./engine/provenance.json.
+
+Chessground 10.1.1 by the Lichess contributors
+https://github.com/lichess-org/chessground
+GPL-3.0-or-later (used under GPL-3.0).
+Full license: ./licenses/CHESSGROUND-LICENSE.txt
+Unmodified board library and piece stylesheet.
+
+Chess piece artwork by Cburnett, distributed in Chessground's
+chessground.cburnett.css; used under the GPL-2.0-or-later option (GPL-3.0).
+https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
+https://commons.wikimedia.org/wiki/File:Chess_plt45.svg
+Full GPL-3.0 license: ./licenses/GPL-3.0.txt
+Talbot makes no changes to the supplied artwork.
+
+chess.js 1.4.0 by Jeff Hlywa and contributors
+https://github.com/jhlywa/chess.js
+BSD-2-Clause.
+Full license and copyright notices: ./licenses/CHESS-JS-LICENSE.txt
+
+Emscripten 6.0.9 and its generated runtime
+https://github.com/emscripten-core/emscripten
+MIT / University of Illinois-NCSA Open Source License.
+Full license and upstream third-party notices: ./licenses/EMSCRIPTEN-LICENSE.txt
+
+Build tools (not application runtime dependencies): Vite (MIT), TypeScript
+(Apache-2.0), Vitest (MIT), and Playwright (Apache-2.0). Exact versions and
+integrity hashes are recorded in package-lock.json in the source archive.

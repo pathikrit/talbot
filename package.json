@@ -1,0 +1,29 @@
+{
+  "name": "talbot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "engines": { "node": ">=22.12.0" },
+  "scripts": {
+    "dev": "node scripts/prepare-licenses.mjs && vite --host 127.0.0.1",
+    "build": "node scripts/prepare-licenses.mjs && tsc --noEmit && vite build && node scripts/package-source.mjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "vitest run",
+    "test:engine": "node scripts/test-engine.mjs",
+    "test:browser": "playwright test",
+    "test:dev": "node scripts/test-dev.mjs",
+    "bench": "node scripts/test-engine.mjs --bench"
+  },
+  "dependencies": {
+    "@lichess-org/chessground": "10.1.1",
+    "chess.js": "1.4.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^22.0.0",
+    "typescript": "~5.9.3",
+    "vite": "8.2.2",
+    "vitest": "5.0.0"
+  }
+}

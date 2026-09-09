@@ -1,0 +1,11 @@
+node_modules/
+.cache/
+dist/
+.tools/
+.build/
+vendor/
+public/engine/
+public/licenses/
+test-results/
+playwright-report/
+.DS_Store
