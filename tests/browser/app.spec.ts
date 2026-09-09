@@ -21,6 +21,30 @@ async function move(page: Page, from: string, to: string): Promise<void> {
 }
 async function fen(page: Page): Promise<string> { return (await page.locator('#board').getAttribute('data-fen'))!; }
 
+test('plays move sounds after interaction and stays silent when muted or navigating history', async ({ page }) => {
+  await page.addInitScript(() => {
+    const start = AudioBufferSourceNode.prototype.start;
+    AudioBufferSourceNode.prototype.start = function (...args: Parameters<typeof start>) {
+      document.documentElement.dataset.soundCount = String(Number(document.documentElement.dataset.soundCount ?? 0) + 1);
+      return start.apply(this, args);
+    };
+  });
+  await ready(page);
+  await expect(page.locator('html')).not.toHaveAttribute('data-sound-count', /.+/);
+  await move(page, 'e2', 'e4');
+  await expect(page.getByRole('status')).toHaveText('Your move');
+  await expect(page.locator('html')).toHaveAttribute('data-sound-count', '2');
+  await page.locator('#undo').click();
+  await page.locator('#redo').click();
+  await expect(page.locator('html')).toHaveAttribute('data-sound-count', '2');
+  await page.getByRole('button', { name: 'Move sounds', exact: true }).click();
+  await expect(page.locator('#sound')).toHaveAttribute('aria-pressed', 'false');
+  await page.locator('#undo').click();
+  await move(page, 'd2', 'd4');
+  await expect(page.getByRole('status')).toHaveText('Your move');
+  await expect(page.locator('html')).toHaveAttribute('data-sound-count', '2');
+});
+
 test('agrees a draw, preserves the result across swapping, and undoes into play', async ({ page }) => {
   await page.addInitScript(() => {
     class DrawOpponent {

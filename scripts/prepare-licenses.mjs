@@ -8,4 +8,5 @@ for (const [from, name] of [
   ['.tools/emsdk/upstream/emscripten/LICENSE', 'EMSCRIPTEN-LICENSE.txt'],
   ['book/licenses/lichess.txt', 'OPENINGS-LICHESS-CC0.txt'],
   ['book/licenses/eco.txt', 'OPENINGS-ECO-MIT.txt'],
+  ['src/assets/sound/NOTICE.txt', 'CHESS-SOUNDS-NOTICE.txt'],
 ]) cpSync(from, `public/licenses/${name}`);

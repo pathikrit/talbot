@@ -1,0 +1,16 @@
+{
+  "repository": "https://github.com/Orivoir/scraping-sound-effects-chess.com",
+  "revision": "f0335e07b3c7c1e82f19e65a38ce2844849c969d",
+  "directory": "assets/default",
+  "license": null,
+  "permission": "Project owner confirmed redistribution permission, 2026-09-09; see NOTICE.txt",
+  "modified": false,
+  "sha256": {
+    "capture.mp3": "7158a77f3eb9a763fe723e9c9291819de8748444a1192d10383159fd8175709b",
+    "castle.mp3": "da05719e6b3f0d04a2ac1a551e643ab14f4e840ae3b9410c0ea15ba4bcac5010",
+    "move-check.mp3": "ef4764a74d19d0db1659e413e8afadc25f1e8cfba83a4a76e6e64f28f3077d52",
+    "move-opponent.mp3": "0931855637e50e4edbc7916ec7a66cca2f0eee763e1c791ff774a9945517ea61",
+    "move-self.mp3": "3a2eb75af1334c06dafd735c23388a560285e0df9436a44d27adc95a010a8547",
+    "promote.mp3": "69219212aa2dce6031d6a641f8813779809bdff33562a8418d8e003eea465815"
+  }
+}

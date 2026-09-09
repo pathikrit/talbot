@@ -218,6 +218,20 @@ ship both license texts in public/licenses, and leave README edits to the user.
 
 ## Browser engine architecture
 
+Sounds are unmodified Chess.com default MP3s from the Orivoir mirror, pinned
+in src/assets/sound with notices and SHA-256 provenance. The mirror has no public
+license; the project owner confirmed redistribution permission on 2026-09-09.
+Do not describe these assets as GPL/OSS or grant downstream reuse rights.
+Do not synthesize substitute sounds or change playback pitch.
+Only controller-committed human/engine moves emit sound; capture includes en passant.
+Six clips: move-self, move-opponent, capture, castle, move-check, promote.
+One sound per move: check/mate > promotion > castle > capture > self/opponent.
+No countdown/result/UI sounds; checkmate uses the check clip, not a defeat sound.
+Undo/redo/seek/ponder/cancelled replies stay silent. Audio unlocks on user gestures,
+does not queue blocked sounds, and failures never block chess. A small header toggle
+mutes sound for the session. Vite bundles six MP3s (30,198 bytes total); preload
+locally at startup, decode after gesture unlock, and never fetch third-party URLs.
+
 The upstream commit is pinned to
 `f1ee4273c6e6068bd6ec0d53ca91c1c391543f85` (Patricia 5.1). Bootstrap checks the
 source archive's SHA-256. The original downloaded source is left untouched in

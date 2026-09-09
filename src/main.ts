@@ -4,6 +4,7 @@ import type { Square } from 'chess.js';
 import { Controller } from './controller';
 import { colorName } from './game';
 import { evaluationBar } from './evaluation';
+import { MoveSounds, soundForMove } from './sound';
 import type { EngineResponse } from './engine/protocol';
 import '@lichess-org/chessground/assets/chessground.base.css';
 import '@lichess-org/chessground/assets/chessground.cburnett.css';
@@ -12,7 +13,10 @@ import './style.css';
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <header class="header">
     <h1>talbot</h1>
+    <div class="header-tools">
+    <button id="sound" aria-label="Move sounds" aria-pressed="true" title="Mute move sounds">Sound on</button>
     <a id="version" class="version" href="https://github.com/pathikrit/talbot/commit/${__GIT_SHA__}" target="_blank" rel="noopener noreferrer" aria-label="View running commit ${__GIT_SHA__.slice(0, 7)}" ${__GIT_SHA__ ? '' : 'hidden'}>${__GIT_SHA__.slice(0, 7)}</a>
+    </div>
   </header>
   <main>
     <section class="board-area" aria-label="Chess game">
@@ -52,7 +56,19 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 
 const element = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const worker = new Worker(new URL('./engine/worker.ts', import.meta.url), { type: 'module' });
-const controller = new Controller(worker, render);
+const sounds = new MoveSounds();
+const controller = new Controller(worker, render, undefined, (move, human) => {
+  if (!document.hidden) sounds.play(soundForMove(move, human));
+});
+for (const event of ['pointerdown', 'pointerup', 'keydown']) {
+  document.addEventListener(event, () => sounds.unlock(), { capture: true });
+}
+element('sound').addEventListener('click', () => {
+  sounds.toggle();
+  element('sound').textContent = sounds.enabled ? 'Sound on' : 'Sound off';
+  element('sound').setAttribute('aria-pressed', String(sounds.enabled));
+  element('sound').title = sounds.enabled ? 'Mute move sounds' : 'Enable move sounds';
+});
 const game = controller.game;
 let renderedHistory = '';
 let renderedBoard = '';

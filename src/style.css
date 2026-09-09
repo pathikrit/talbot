@@ -11,6 +11,8 @@ h1 { font: 700 34px/1 Georgia, serif; letter-spacing: -1.5px; margin: 0; }
 nav { display: flex; gap: 8px; }
 .version { color: #a29c94; font: 12px monospace; text-decoration: none; }
 .version:hover { color: #f0d7b2; text-decoration: underline; }
+.header-tools { display: flex; align-items: center; gap: 12px; }
+#sound { font-size: 11px; padding: 5px 7px; color: #a29c94; }
 main { max-width: 1000px; margin: 0 auto 24px; padding: 0 24px; display: grid; grid-template-columns: minmax(0, 640px) minmax(330px, 1fr); align-items: stretch; gap: 24px; }
 .board-area { min-width: 0; }
 .board-layout { --capture-size: min(calc(var(--board-size, 448px) / 16), calc((var(--board-size, 448px) - 40px) / var(--capture-rows, 16))); display: grid; grid-template-columns: 24px 58px minmax(0, 1fr); gap: 8px; }

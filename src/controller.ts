@@ -1,5 +1,5 @@
 import { Chess } from 'chess.js';
-import type { Color } from 'chess.js';
+import type { Color, Move } from 'chess.js';
 import { Game } from './game';
 import { now } from './engine/protocol';
 import { whiteEvaluation } from './evaluation';
@@ -29,7 +29,8 @@ export class Controller {
   private watchdog?: ReturnType<typeof setTimeout>;
   private openings: Partial<Record<Color, string | null>>[] = [{}];
 
-  constructor(private engine: EnginePort, private changed: () => void, game = new Game()) {
+  constructor(private engine: EnginePort, private changed: () => void, game = new Game(),
+    private moved: (move: Move, human: boolean) => void = () => {}) {
     this.game = game;
   }
 
@@ -67,7 +68,8 @@ export class Controller {
           const offerDraw = this.game.cursor >= 40 && this.game.cursor - this.lastDrawOffer >= 20
             && assessed && assessed.depth >= 8 && assessed.score.kind === 'cp' && Math.abs(assessed.score.value) <= 20;
           const plans = { ...this.openings[this.game.cursor], [side]: message.opening ?? null };
-          this.game.play(message.move);
+          const played = this.game.play(message.move);
+          this.notifyMove(played, false);
           if (this.drawOffer === 'human') this.drawNotice = 'Talbot declined the draw';
           this.drawOffer = undefined;
           if (offerDraw && !this.game.over) {
@@ -88,6 +90,10 @@ export class Controller {
     clearTimeout(this.moveTimer);
     clearTimeout(this.watchdog);
     this.engine.postMessage({ type: 'stop' });
+  }
+
+  private notifyMove(move: Move, human: boolean): void {
+    try { this.moved(move, human); } catch { /* Optional feedback cannot interrupt the game. */ }
   }
 
   private sync(preserveEvaluation = false): void {
@@ -132,7 +138,8 @@ export class Controller {
   play(uci: string): void {
     if (!this.ready || this.error || !this.visible || !this.game.humanTurn || this.game.over) return;
     const plans = { ...this.openings[this.game.cursor] };
-    this.game.play(uci);
+    const played = this.game.play(uci);
+    this.notifyMove(played, true);
     this.clearDraw();
     this.openings = this.openings.slice(0, this.game.cursor);
     this.openings[this.game.cursor] = plans;

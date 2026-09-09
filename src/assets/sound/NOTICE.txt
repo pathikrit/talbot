@@ -1,0 +1,13 @@
+Chess.com default chess sound recordings
+Source mirror: https://github.com/Orivoir/scraping-sound-effects-chess.com
+Revision: f0335e07b3c7c1e82f19e65a38ce2844849c969d
+Path: assets/default
+
+Included unmodified: move-self.mp3, move-opponent.mp3, capture.mp3,
+castle.mp3, move-check.mp3, promote.mp3.
+
+The source mirror supplies no public license. The Talbot project owner confirmed
+permission to redistribute these recordings on 2026-09-09. No license document
+was provided; this notice records that confirmation, not an independent license
+grant or verification. Rights to these recordings are not granted by Talbot's
+GPL license. Downstream redistributors must obtain appropriate permission.

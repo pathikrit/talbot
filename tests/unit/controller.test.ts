@@ -17,6 +17,26 @@ beforeEach(() => {
 afterEach(() => { controller.dispose(); vi.useRealTimers(); });
 
 describe('search lifecycle', () => {
+  it('emits feedback only for committed moves, with capture and player information', () => {
+    controller.dispose();
+    const moved = vi.fn();
+    controller = new Controller({ postMessage: message => requests.push(message) }, () => {}, undefined, moved);
+    controller.receive({ type: 'ready' });
+    controller.receive({ type: 'bestmove', id: search().id, move: 'e2e4' });
+    expect(moved).not.toHaveBeenCalled();
+    controller.play('e2e4');
+    expect(moved).toHaveBeenLastCalledWith(expect.objectContaining({ from: 'e2', to: 'e4' }), true);
+    controller.receive({ type: 'bestmove', id: search().id, move: 'd7d5' });
+    vi.advanceTimersByTime(999); expect(moved).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(1);
+    expect(moved).toHaveBeenLastCalledWith(expect.objectContaining({ from: 'd7' }), false);
+    controller.play('e4d5');
+    expect(moved).toHaveBeenLastCalledWith(expect.objectContaining({ captured: 'p' }), true);
+    controller.receive({ type: 'bestmove', id: search().id, move: 'd8d5' });
+    controller.undo(); controller.redo(); controller.swap(); controller.newGame();
+    vi.advanceTimersByTime(1000);
+    expect(moved).toHaveBeenCalledTimes(3);
+  });
   it('clears pending offers when sides or history change and ignores stale evaluations', () => {
     controller.play('e2e4');
     controller.offerDraw();

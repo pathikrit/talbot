@@ -1,6 +1,15 @@
 TALBOT 0.1.0
 ===========
 
+Chess.com default sound recordings, mirrored by Orivoir:
+https://github.com/Orivoir/scraping-sound-effects-chess.com
+Revision: f0335e07b3c7c1e82f19e65a38ce2844849c969d
+Six unmodified MP3s: move-self, move-opponent, capture, castle, move-check, promote.
+Bundled on the project owner's confirmation of permission to redistribute.
+No public asset license was supplied by the mirror; these recordings are not
+covered by Talbot's GPL license. See ./licenses/CHESS-SOUNDS-NOTICE.txt.
+Original files and provenance are in src/assets/sound in the source archive.
+
 Talbot application and browser adapter: GPL-3.0-only, without warranty.
 Full license: ./licenses/GPL-3.0.txt
 Corresponding source for this build: ./talbot-source.tar.gz
