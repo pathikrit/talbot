@@ -62,16 +62,46 @@ describe('compiled book', () => {
 });
 
 describe('initial random choice then committed repertoire', () => {
-  it('varies the opening choice with gambit-weighted family sampling', () => {
+  it('balances distinct opening moves, then weights compatible families', () => {
     const book = new OpeningBook(fixture());
     const { chess, request } = position();
     const set = candidates(['e2e4', 'd2d4', 'g1f3']);
     const counts: Record<string, number> = {};
-    for (let n = 0; n < 90; n++) {
-      const chosen = book.choose(chess, request, set, 'e2e4', undefined, () => (n + .5) / 90)!;
-      counts[chosen.lineId] = (counts[chosen.lineId] ?? 0) + 1;
+    for (let move = 0; move < 2; move++) {
+      for (let family = 0; family < 5; family++) {
+        const draws = [(move + .5) / 2, (family + .5) / 5, 0];
+        const chosen = book.choose(chess, request, set, 'e2e4', undefined, () => draws.shift()!)!;
+        counts[chosen.lineId] = (counts[chosen.lineId] ?? 0) + 1;
+      }
     }
-    expect(counts).toEqual({ kings: 40, queens: 40, italian: 10 });
+    expect(counts).toEqual({ kings: 4, queens: 5, italian: 1 });
+  });
+  it('does not let many Black gambits sharing e5 crowd out other book replies', () => {
+    const { chess, request } = position(['e2e4']);
+    const set = candidates(['e7e5', 'c7c5', 'e7e6']);
+    const book = new OpeningBook(data);
+    const counts: Record<string, number> = {};
+    for (let n = 0; n < 70; n++) {
+      const draws = [(n + .5) / 70, 0, 0];
+      const chosen = book.choose(chess, request, set, 'e7e5', undefined, () => draws.shift()!)!;
+      const move = chosen.analysis.pv[0];
+      counts[move] = (counts[move] ?? 0) + 1;
+      expect(data.families.find(f => f.id === data.lines.find(l => l.id === chosen.lineId)!.family)!.side).toBe('b');
+    }
+    // Trap weight 5 versus ordinary Sicilian/French weight 1 each, regardless
+    // of how many different e5 families/variations the source contains.
+    expect(counts).toEqual({ e7e5: 50, c7c5: 10, e7e6: 10 });
+  });
+  it('downweights a recently repeated move, family and exact line', () => {
+    const book = new OpeningBook(fixture());
+    const { chess, request } = position();
+    const recent = [{ lineId: 'kings', move: 'e2e4' }];
+    let draws = [.2, 0, 0];
+    expect(book.choose(chess, request, candidates(['e2e4', 'd2d4']), 'e2e4', undefined,
+      () => draws.shift()!, recent)?.lineId).toBe('queens');
+    draws = [0, .75, 0];
+    expect(book.choose(chess, request, candidates(['e2e4']), 'e2e4', undefined,
+      () => draws.shift()!, recent)?.lineId).toBe('italian');
   });
   it('does not increase family probability when duplicate variations are added', () => {
     const source = fixture();
@@ -87,9 +117,11 @@ describe('initial random choice then committed repertoire', () => {
     expect(choice?.analysis.pv[0]).toBe('f2f4');
     expect(choice?.lineId).toBe('kings');
   });
-  it('abandons the line if it costs more than 50cp', () => {
+  it('accepts a line at 75cp loss but abandons it above that', () => {
     const { chess, request } = position(['e2e4', 'e7e5']);
-    expect(new OpeningBook(fixture()).choose(chess, request, candidates(['g1f3', 'f2f4'], [30, -21]), 'g1f3', 'kings')).toBeUndefined();
+    const book = new OpeningBook(fixture());
+    expect(book.choose(chess, request, candidates(['g1f3', 'f2f4'], [30, -45]), 'g1f3', 'kings')?.analysis.pv[0]).toBe('f2f4');
+    expect(book.choose(chess, request, candidates(['g1f3', 'f2f4'], [30, -46]), 'g1f3', 'kings')).toBeUndefined();
   });
   it('falls back on deviations, exhausted lines and explicit out-of-book state', () => {
     const book = new OpeningBook(fixture());

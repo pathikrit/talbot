@@ -1,7 +1,7 @@
 import config from '../settings.json';
 
 // Internal search breadth, not a user-facing style setting.
-export const SEARCH_MULTIPV = 20;
+export const SEARCH_MULTIPV = 50;
 
 export function validateSettings(value: { maxSacrificeLossCp: number }) {
   if (!Number.isSafeInteger(value.maxSacrificeLossCp) || value.maxSacrificeLossCp < 0) {

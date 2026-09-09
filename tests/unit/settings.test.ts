@@ -1,10 +1,12 @@
 import { expect, it } from 'vitest';
-import { settings, validateSettings } from '../../src/settings';
+import { SEARCH_MULTIPV, settings, validateSettings } from '../../src/settings';
 import config from '../../settings.json';
 
 it('loads settings.json as immutable shared configuration', () => {
   expect(settings).toEqual(config);
   expect(Object.isFrozen(settings)).toBe(true);
+  expect(settings.maxSacrificeLossCp).toBe(75);
+  expect(SEARCH_MULTIPV).toBe(50);
 });
 
 it.each([-1, 0.5, Infinity])('rejects invalid centipawn budget %s', maxSacrificeLossCp => {

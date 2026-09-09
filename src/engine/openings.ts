@@ -1,6 +1,6 @@
 import { Chess, DEFAULT_POSITION } from 'chess.js';
 import data from '../../book/opening-book.json';
-import type { Analysis, PositionRequest } from './protocol';
+import type { Analysis, PositionRequest, RecentOpening } from './protocol';
 import { CandidateSet, eligibleCandidates } from './sacrifice';
 
 export interface BookLine {
@@ -17,6 +17,15 @@ export interface BookData {
 }
 export interface BookChoice { analysis: Analysis; lineId: string }
 export const openingKey = (chess: Chess): string => chess.fen().split(' ').slice(0, 4).join(' ');
+
+function weighted<T>(items: T[], weight: (item: T) => number, random: () => number): T {
+  let ticket = random() * items.reduce((sum, item) => sum + weight(item), 0);
+  for (const item of items) {
+    ticket -= weight(item);
+    if (ticket < 0) return item;
+  }
+  return items.at(-1)!;
+}
 
 export class OpeningBook {
   private positions: Map<string, number>;
@@ -44,7 +53,8 @@ export class OpeningBook {
   }
 
   choose(position: Chess, request: PositionRequest, candidates: CandidateSet, fallback: string,
-    lineId?: string | null, random: () => number = Math.random): BookChoice | undefined {
+    lineId?: string | null, random: () => number = Math.random,
+    recent: RecentOpening[] = []): BookChoice | undefined {
     if (lineId === null || request.fen !== DEFAULT_POSITION) return;
     const positionId = this.positions.get(openingKey(position));
     if (positionId === undefined) return;
@@ -67,16 +77,31 @@ export class OpeningBook {
       moves: [...moves].filter(([move]) => eligible.has(move)),
     })).filter(choice => choice.moves.length && choice.family.side === position.turn());
     if (!choices.length) return;
-    // Families, then distinct moves, then lines: source duplication and families
-    // with hundreds of named variations must not dominate the random draw.
-    let ticket = random() * choices.reduce((sum, choice) => sum + choice.family.weight, 0);
-    let chosen = choices.at(-1)!;
-    for (const choice of choices) {
-      ticket -= choice.family.weight;
-      if (ticket < 0) { chosen = choice; break; }
+    const moveCounts = new Map<string, number>();
+    const familyCounts = new Map<string, number>();
+    const lineCounts = new Map<string, number>();
+    for (const entry of recent) {
+      moveCounts.set(entry.move, (moveCounts.get(entry.move) ?? 0) + 1);
+      lineCounts.set(entry.lineId, (lineCounts.get(entry.lineId) ?? 0) + 1);
+      const family = this.lines.get(entry.lineId)?.family;
+      if (family) familyCounts.set(family, (familyCounts.get(family) ?? 0) + 1);
     }
-    const [move, lines] = chosen.moves[Math.floor(random() * chosen.moves.length)];
-    const line = lines[Math.floor(random() * lines.length)];
+    // Draw distinct first moves before families: many gambits share ...e5/e4,
+    // which must not crowd out other opening responses. Use the strongest
+    // family weight, not their sum, to retain the gambit/trap preference.
+    const byMove = new Map<string, { family: BookData['families'][number]; lines: BookLine[] }[]>();
+    for (const choice of choices) {
+      for (const [move, lines] of choice.moves) {
+        const families = byMove.get(move) ?? [];
+        families.push({ family: choice.family, lines });
+        byMove.set(move, families);
+      }
+    }
+    const [move, families] = weighted([...byMove], ([move, families]) =>
+      Math.max(...families.map(({ family }) => family.weight)) / (1 + 4 * (moveCounts.get(move) ?? 0)), random);
+    const { lines } = weighted(families, ({ family }) =>
+      family.weight / (1 + 3 * (familyCounts.get(family.id) ?? 0)), random);
+    const line = weighted(lines, line => 1 / (1 + 2 * (lineCounts.get(line.id) ?? 0)), random);
     return { analysis: eligible.get(move)!, lineId: line.id };
   }
 }

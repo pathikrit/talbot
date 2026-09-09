@@ -7,7 +7,7 @@ const openingData = JSON.parse(readFileSync(new URL('../../book/opening-book.jso
 
 const workerAsset = readdirSync(new URL('../../dist/assets/', import.meta.url)).find(name => /^worker-.*\.js$/.test(name))!;
 
-test('the production worker selects the largest declined sacrifice within 50cp and returns its own PV', async ({ page }) => {
+test('the staged production worker deepens and selects a future declined sacrifice within 75cp', async ({ page }) => {
   // Exercise the actual bundled worker/selector with deterministic Patricia
   // output; separate app tests exercise real WASM searches and timing.
   await page.route('**/harness.html', route => route.fulfill({ contentType: 'text/html', body: '<title>Worker test</title>' }));
@@ -15,11 +15,11 @@ test('the production worker selects the largest declined sacrifice within 50cp a
     export default async function({ print }) {
       return { ccall(name) {
         if (name === 'talbot_position') return 1;
-        if (name === 'talbot_search') {
-          print('info depth 7 multipv 1 score cp 50 pv h1g1 a8b8');
-          print('info depth 7 multipv 2 score cp 40 pv b2b4 a8b8');
-          print('info depth 7 multipv 3 score cp 0 pv g2e3 a8b8');
-          print('bestmove h1g1');
+        if (name === 'talbot_search' || name === 'talbot_search_moves') {
+          const depth = name === 'talbot_search' ? 4 : 8;
+          print('info depth ' + depth + ' multipv 1 score cp 75 pv h1h2 a8b8');
+          print('info depth ' + depth + ' multipv 2 score cp 0 pv h1g1 a8b8 e3e4 b8a8');
+          print('bestmove h1h2');
           return Promise.resolve();
         }
       }};
@@ -29,13 +29,13 @@ test('the production worker selects the largest declined sacrifice within 50cp a
   const response = await page.evaluate(async asset => {
     const worker = new Worker(new URL(`assets/${asset}`, location.href), { type: 'module' });
     try {
-      return await new Promise<{ move: string; selected?: { pv: string[]; score: { value: number } } }>((resolve, reject) => {
+      return await new Promise<{ move: string; selected?: { depth: number; pv: string[]; score: { value: number } } }>((resolve, reject) => {
         const timer = setTimeout(() => reject(new Error('Worker timed out')), 3000);
         worker.onerror = error => { clearTimeout(timer); reject(new Error(error.message)); };
         worker.onmessage = ({ data }) => {
           if (data.type === 'ready') worker.postMessage({
-            type: 'search', id: 1, multipv: 3,
-            position: { fen: 'k7/8/8/p7/3p4/8/1P4N1/7K w - - 0 1', moves: [] },
+            type: 'search', id: 1, multipv: 2,
+            position: { fen: 'k7/8/8/3p4/8/4P3/8/7K w - - 0 1', moves: [] },
             deadline: performance.timeOrigin + performance.now() + 1000,
           });
           if (data.type === 'bestmove') { clearTimeout(timer); resolve(data); }
@@ -45,9 +45,10 @@ test('the production worker selects the largest declined sacrifice within 50cp a
       });
     } finally { worker.terminate(); }
   }, workerAsset);
-  expect(response.move).toBe('g2e3');
-  expect(response.selected?.pv).toEqual(['g2e3', 'a8b8']);
+  expect(response.move).toBe('h1g1');
+  expect(response.selected?.pv).toEqual(['h1g1', 'a8b8', 'e3e4', 'b8a8']);
   expect(response.selected?.score.value).toBe(0);
+  expect(response.selected?.depth).toBe(8);
 });
 
 test('bundled book follows a committed opening but falls back on deviation or excessive loss', async ({ page }) => {
@@ -58,10 +59,10 @@ test('bundled book follows a committed opening but falls back on deviation or ex
       let search = 0;
       return { ccall(name) {
         if (name === 'talbot_position') return 1;
-        if (name === 'talbot_search') {
-          search++;
+        if (name === 'talbot_search' || name === 'talbot_search_moves') {
+          if (name === 'talbot_search') search++;
           print('info depth 7 multipv 1 score cp 40 pv b1c3');
-          print('info depth 7 multipv 2 score cp ' + (search === 3 ? -11 : 0) + ' pv g1f3');
+          print('info depth 7 multipv 2 score cp ' + (search === 3 ? -36 : 0) + ' pv g1f3');
           print('bestmove b1c3');
           return Promise.resolve();
         }

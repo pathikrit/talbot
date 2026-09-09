@@ -6,6 +6,7 @@ import { settings } from '../settings';
 export const SELECTOR_RESERVE_MS = 100;
 const values: Record<PieceSymbol, number> = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 0 };
 const uci = (move: Move) => move.from + move.to + (move.promotion ?? '');
+const FUTURE_SACRIFICE_MOVES = 4;
 
 /** Keep only complete, distinct, common-depth sets, never an in-flight mixture. */
 export class CandidateSet {
@@ -125,6 +126,52 @@ export function sacrificeSize(fen: string, pv: string[], budget: ProbeBudget): n
   return largest;
 }
 
+/** Cheap first-pass signal for a fresh material offer now or during the next
+ * few Talbot turns in the PV. False positives are fine here: finalists are
+ * searched more deeply and then checked by the bounded tactical minimax.
+ */
+export function sacrificePotential(fen: string, pv: string[]): number {
+  const line = new Chess(fen);
+  let largest = 0;
+  try {
+    for (let ply = 0; ply < pv.length && ply < FUTURE_SACRIFICE_MOVES * 2; ply++) {
+      if (!(ply & 1)) {
+        const root = new Chess(line.fen());
+        const side = root.turn();
+        const opponent = side === 'w' ? 'b' : 'w';
+        const baseline = material(root, side);
+        const offered = root.move(pv[ply]);
+        for (const capture of root.moves({ verbose: true }).filter(move => move.captured)) {
+          const square = (capture.isEnPassant() ? capture.to[0] + capture.from[1] : capture.to) as Square;
+          if (square !== offered.to && line.isAttacked(square, opponent)) continue;
+          root.move(uci(capture));
+          largest = Math.max(largest, baseline - material(root, side));
+          root.undo();
+        }
+      }
+      line.move(pv[ply]);
+    }
+  } catch { /* A truncated or stale PV simply has no further potential. */ }
+  return Math.max(0, largest);
+}
+
+/** Verify fresh offers at the root and at future Talbot turns in the supplied
+ * PV. Scores still belong to the root move; this only measures its tactical
+ * direction, including combinations that begin with a quiet move.
+ */
+export function lineSacrificeSize(fen: string, pv: string[], budget: ProbeBudget): number {
+  const line = new Chess(fen);
+  let largest = 0;
+  try {
+    for (let ply = 0; ply < pv.length && ply < FUTURE_SACRIFICE_MOVES * 2; ply++) {
+      if (!(ply & 1)) largest = Math.max(largest, sacrificeSize(line.fen(), pv.slice(ply), budget));
+      if (budget.nodes < 0 || performance.now() >= budget.expires) break;
+      line.move(pv[ply]);
+    }
+  } catch { /* Preserve any earlier verified offer on an invalid frontier. */ }
+  return largest;
+}
+
 export function offersSacrifice(fen: string, pv: string[], budget: ProbeBudget): boolean {
   return sacrificeSize(fen, pv, budget) >= 100;
 }
@@ -141,6 +188,24 @@ export function eligibleCandidates(candidates: CandidateSet, fallback: string): 
     .sort((a, b) => b.score.value - a.score.value || a.multipv - b.multipv);
 }
 
+/** Keep Patricia's best move, an eligible book move, and the highest-potential
+ * sacrifice roots for the focused second search stage.
+ */
+export function shortlistCandidates(fen: string, candidates: CandidateSet, fallback: string,
+  limit: number, preferred?: string): string[] {
+  const eligible = eligibleCandidates(candidates, fallback);
+  if (!eligible.length) return [fallback];
+  const ranked = eligible.map(info => ({ info, potential: sacrificePotential(fen, info.pv) }))
+    .sort((a, b) => b.potential - a.potential || b.info.score.value - a.info.score.value
+      || a.info.multipv - b.info.multipv);
+  const moves: string[] = [];
+  for (const move of [fallback, preferred, ...ranked.map(row => row.info.pv[0])]) {
+    if (move && !moves.includes(move)) moves.push(move);
+    if (moves.length >= limit) break;
+  }
+  return moves;
+}
+
 export function chooseSacrifice(fen: string, candidates: CandidateSet, fallback: string,
   expires = performance.now() + 80): Analysis | undefined {
   const eligible = eligibleCandidates(candidates, fallback);
@@ -148,7 +213,7 @@ export function chooseSacrifice(fen: string, candidates: CandidateSet, fallback:
   let selected: Analysis | undefined;
   let largest = 0;
   for (const info of eligible) {
-    const size = sacrificeSize(fen, info.pv, budget);
+    const size = lineSacrificeSize(fen, info.pv, budget);
     // Candidates are evaluation-sorted, so equal-sized offers keep the better
     // score (then the original MultiPV order). Retain verified work on timeout.
     if (size > largest) { largest = size; selected = info; }

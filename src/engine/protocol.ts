@@ -1,4 +1,5 @@
 export interface PositionRequest { fen: string; moves: string[] }
+export interface RecentOpening { lineId: string; move: string }
 export interface SearchRequest {
   type: 'search';
   id: number;
@@ -8,6 +9,8 @@ export interface SearchRequest {
   multipv?: number;
   /** undefined = may choose early; string = committed line; null = out of book. */
   opening?: string | null;
+  /** Bounded browser-local history used only to downweight repeated choices. */
+  recentOpenings?: RecentOpening[];
 }
 export type EngineRequest =
   | { type: 'init'; assetBase: string }

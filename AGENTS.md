@@ -120,7 +120,7 @@ implemented.
 
 Patricia has **no upstream aggression slider**. Its style is built into its
 evaluation and networks. Talbot uses full-strength search (`Skill_Level=21`,
-one thread, 32 MB hash, MultiPV 20 by default), with an **experimental modification**:
+one thread, 32 MB hash, MultiPV 50 by default), with an **experimental modification**:
 retain the Feanor sacrifice network for non-endgame search roots instead of
 switching networks after depth six. Below Patricia's original material threshold
 it still uses Finarfin, the endgame network. All three upstream networks are
@@ -137,12 +137,17 @@ depth, cp/mate score, nodes, NPS, and PV. Bound-only output is filtered out.
 ### Sacrifice selection
 
 `src/engine/sacrifice.ts` chooses the largest verified net material offer within
-50cp of the best candidate by default, breaking size ties by better evaluation
-and then MultiPV order. Search requests 20 distinct root moves, capped
-at the legal move count, during both timed play and pondering. Only the latest
-complete common-depth batch (depth >= 4) is comparable. Partial newer iterations
-do not replace it. Mate scores disable selection; an unavailable fallback move,
-incomplete batch, or no qualifying offer leaves Patricia's best move unchanged.
+75cp of the best candidate by default, breaking size ties by better evaluation
+and then MultiPV order. Search requests 50 distinct root moves, capped
+at the legal move count. Timed play spends 45% of the available search window on
+that broad pass, cheaply ranks sacrifice potential through the next four Talbot
+turns in each PV, then restricts Patricia's remaining search to six finalists.
+The finalists always include the broad best move and any eligible chosen book
+move. Pondering remains an unrestricted long-running 50-line search to warm TT.
+Only the latest complete common-depth batch (depth >= 4) from each stage is
+comparable. Partial newer iterations do not replace it. Mate scores disable
+selection; an unavailable fallback move, incomplete batch, or no qualifying
+offer leaves Patricia's best move unchanged.
 
 Root `settings.json` has one setting: `maxSacrificeLossCp`, the allowed evaluation
 loss (nonnegative integer). MultiPV is internal (`SEARCH_MULTIPV` in src/settings.ts),
@@ -153,8 +158,9 @@ or UI controls are added. Keep settings.json in the source-package allowlist.
 Wider MultiPV reduces search depth within the unchanged one-second budget.
 
 Acceptance is checked separately from the main PV: **declined offers count**.
-Require a new immediate legal capture that leaves Talbot at least a pawn worse
-in net material relative to the root, accounting for its own initial capture.
+At the root and each of the next three Talbot turns in the PV, require a newly
+created legal capture that leaves Talbot at least a pawn worse in net material
+relative to that position, accounting for its own initial capture.
 This includes rook-for-knight and queen-for-rook sacrifices, not equal trades.
 An unrelated move leaving an already attacked piece in place does not qualify.
 The supplied acceptance PV must not regain the investment. A bounded material
@@ -167,13 +173,15 @@ returning the first sacrifice. Keep the largest verified offer if time runs out.
 Unresolved acceptance lines are skipped and do not erase already verified ones.
 
 This is a conservative **heuristic**, not proof of a true long-term sacrifice:
-quiet tactics outside the PV and deferred offers are not fully resolved. The
+quiet tactics outside the PV and offers beyond the four-turn horizon are not
+resolved. The
 material probe does not establish positional soundness; Patricia's root score
 estimates that. A six-ply unresolved tactical frontier, mate, invalid PV or
 exhausted probe budget makes that offer unclassified. Do not describe the cp
 budget as a guaranteed strength or safety bound.
 
-Reserve 100ms of the existing one-second wall-clock deadline; probing uses at
+Reserve 100ms of the existing one-second wall-clock deadline; the broad and
+focused Patricia calls share all time before that reserve. Final probing uses at
 most 80ms / 1500 nodes across candidates, with time checks between nodes. Browser
 scheduling or a costly individual node may overrun slightly. Probing runs only
 in the worker after the timed search unwinds. Pondering retains MultiPV/TT work,
@@ -187,8 +195,11 @@ emit a result. The controller still holds early replies until the deadline.
 `book/opening-book.json` is a checked-in, offline-compiled book: 486 legal lines
 in 26 explicitly side-tagged families, with gambits/traps weighted above ordinary
 openings. It includes Alien, Evans, King's, Queen's, Stafford, and named traps.
-The initial draw selects a family by weight, then a distinct move, then a line;
-duplicate source records or prolific families do not increase family probability.
+The initial draw selects a distinct move weighted by its highest-weight compatible
+family, then a weighted family within that move, then a line. Summing family
+weights per move would let the many e4/...e5 families crowd out other responses.
+Duplicate records do not increase family probability; gambit/trap moves still
+have a higher weight than ordinary openings. This applies to both colors.
 Choose once, on the first available engine turn within the first four plies.
 After that, follow that exact line, not a new random branch every move. Compatible
 same-position transpositions are supported without rewinding along the line.
@@ -205,8 +216,13 @@ continue even in book positions. Speculative searches never choose a book line.
 The controller stores per-color opening plans with each history cursor, only
 when a real move commits. Undo/redo restores plans without rerandomizing recorded
 moves; a new branch discards future plans, swaps keep plans attached to their
-playing side, and New game clears all plans. Custom starting FENs do not enter
-the book. Keep all of this out of the minimal UI and settings.json.
+playing side, and New game clears all in-game plans. A separate best-effort
+`localStorage` history retains at most 12 committed opening selections across
+games. Recent root moves, families, and exact lines are progressively downweighted
+rather than forbidden; if storage is unavailable, a bounded in-memory history
+still works for the current page. Validate loaded data and never let this history
+grow beyond 12 entries. Custom starting FENs do not enter the book. Keep all of
+this out of the minimal UI and settings.json.
 
 Maintenance: `npm run book:compile` regenerates the book offline;
 `npm run book:check` verifies reproducibility and is a CI gate. To deliberately
@@ -255,7 +271,9 @@ On your turn, the worker searches a hypothetical predicted reply from the last
 PV when one is available, or the current position otherwise. These results
 never make real moves. On your move, the old search stops and fully unwinds,
 then a timed search starts at the actual position, retaining the transposition
-table. This is application-level background analysis, **not native UCI
+table. The timed search performs a broad pass followed by a root-restricted
+focused pass; `talbot_search_moves` must skip filtered moves in root search as
+well as in Patricia's root accounting. This is application-level background analysis, **not native UCI
 `ponderhit` support**. Cancellation time counts toward the one-second reply
 budget; early results are held until the deadline. Hidden tabs stop analysis
 and get a fresh reply budget on return. Background thinking uses a CPU core and

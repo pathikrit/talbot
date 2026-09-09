@@ -17,6 +17,8 @@ const lastInfo = output => output.filter(line => line.startsWith('info ') && !li
 const bestmove = output => output.findLast(line => line.startsWith('bestmove '))?.split(' ')[1];
 const native = (fen, depth, moves = '') => execFileSync('.build/patricia-native', ['search', fen, String(depth), moves], { encoding: 'utf8' }).trim().split('\n');
 const search = (ms, depth = 0, multipv = 1) => call('search', null, ['number', 'number', 'number'], [ms, depth, multipv], { async: true });
+const searchMoves = (ms, depth, moves) => call('search_moves', null,
+  ['number', 'number', 'number', 'string'], [ms, depth, moves.length, moves.join(' ')], { async: true });
 
 for (const [name, fen, depth, nodes] of [
   ['start', DEFAULT_POSITION, 4, 197281],
@@ -57,6 +59,34 @@ const candidates = lines.filter(line => /multipv \d+ depth 4 /.test(line) && !li
 assert.equal(candidates.length, 20);
 assert.equal(new Set(candidates.map(line => line.match(/ pv (\S+)/)?.[1])).size, 20);
 console.log('PASS MultiPV: 20 distinct legal first moves');
+
+position(DEFAULT_POSITION);
+await searchMoves(-1, 5, ['e2e4', 'd2d4']);
+const focused = lines.filter(line => /multipv \d+ depth 5 /.test(line) && !line.includes('bound'));
+assert.equal(focused.length, 2);
+assert.deepEqual(new Set(focused.map(line => line.match(/ pv (\S+)/)?.[1])), new Set(['e2e4', 'd2d4']));
+assert.ok(['e2e4', 'd2d4'].includes(bestmove(lines)));
+console.log('PASS focused root search: e2e4 / d2d4 only');
+
+// Match the browser lifecycle: interrupt a ponder, broadly search the played
+// position, then continue on a root-restricted finalist set without resetting TT.
+position(DEFAULT_POSITION);
+let ponderStopped = false;
+const ponderTimer = setTimeout(() => { ponderStopped = true; call('stop'); }, 80);
+await search(-1, 0, 20);
+clearTimeout(ponderTimer);
+assert.ok(ponderStopped);
+assert.equal(call('position', 'number', ['string', 'string'], [DEFAULT_POSITION, 'e2e4']), 1);
+lines = [];
+await search(400, 0, 20);
+const rootDepth = Math.max(...lines.flatMap(line => Number(line.match(/info multipv 20 depth (\d+)/)?.[1] ?? 0)));
+const broadRoots = lines.filter(line => line.includes(`multipv `) && line.includes(`depth ${rootDepth} `)
+  && !line.includes('bound')).slice(0, 6).map(line => line.match(/ pv (\S+)/)?.[1]).filter(Boolean);
+assert.equal(broadRoots.length, 6);
+lines = [];
+await searchMoves(500, 0, broadRoots);
+assert.ok(broadRoots.includes(bestmove(lines)));
+console.log(`PASS staged ponder/broad/focused lifecycle: ${broadRoots.join(' ')}`);
 
 position(DEFAULT_POSITION);
 const started = performance.now();

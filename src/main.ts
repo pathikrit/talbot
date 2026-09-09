@@ -6,6 +6,7 @@ import { colorName } from './game';
 import { evaluationBar } from './evaluation';
 import { MoveSounds, soundForMove } from './sound';
 import { icons } from './icons';
+import { OpeningMemory } from './opening-memory';
 import type { EngineResponse } from './engine/protocol';
 import '@lichess-org/chessground/assets/chessground.base.css';
 import '@lichess-org/chessground/assets/chessground.cburnett.css';
@@ -58,9 +59,10 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 const element = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const worker = new Worker(new URL('./engine/worker.ts', import.meta.url), { type: 'module' });
 const sounds = new MoveSounds();
+const openingMemory = new OpeningMemory();
 const controller = new Controller(worker, render, undefined, (move, human) => {
   if (!document.hidden) sounds.play(soundForMove(move, human));
-});
+}, openingMemory);
 for (const event of ['pointerdown', 'pointerup', 'keydown']) {
   document.addEventListener(event, () => sounds.unlock(), { capture: true });
 }
@@ -83,11 +85,16 @@ const board = Chessground(element('board'), {
   disableContextMenu: true,
 });
 
+let boardResizeFrame = 0;
 new ResizeObserver(([entry]) => {
-  element('board').closest<HTMLElement>('.board-layout')!.style.setProperty('--board-size', `${entry.contentRect.width}px`);
-  // Chessground caches pixel dimensions; mobile viewport changes do not always
-  // trigger its window resize handler after CSS has finished reflowing.
-  board.redrawAll();
+  const size = `${entry.contentRect.width}px`;
+  cancelAnimationFrame(boardResizeFrame);
+  boardResizeFrame = requestAnimationFrame(() => {
+    element('board').closest<HTMLElement>('.board-layout')!.style.setProperty('--board-size', size);
+    // Chessground caches pixel dimensions; mobile viewport changes do not always
+    // trigger its window resize handler after CSS has finished reflowing.
+    board.redrawAll();
+  });
 }).observe(element('board'));
 
 function onMove(from: Key, to: Key): void {

@@ -5,10 +5,12 @@ import { now } from './engine/protocol';
 import { whiteEvaluation } from './evaluation';
 import { SEARCH_MULTIPV } from './settings';
 import type { Evaluation } from './evaluation';
-import type { Analysis, EngineRequest, EngineResponse } from './engine/protocol';
+import type { Analysis, EngineRequest, EngineResponse, RecentOpening } from './engine/protocol';
 
 export interface EnginePort { postMessage(message: EngineRequest): void }
+export interface OpeningMemoryPort { recent(): RecentOpening[]; remember(entry: RecentOpening): void }
 export type EngineMode = 'loading' | 'thinking' | 'pondering' | 'paused' | 'idle' | 'error';
+const noOpeningMemory: OpeningMemoryPort = { recent: () => [], remember: () => {} };
 
 export class Controller {
   readonly game: Game;
@@ -30,7 +32,8 @@ export class Controller {
   private openings: Partial<Record<Color, string | null>>[] = [{}];
 
   constructor(private engine: EnginePort, private changed: () => void, game = new Game(),
-    private moved: (move: Move, human: boolean) => void = () => {}) {
+    private moved: (move: Move, human: boolean) => void = () => {},
+    private openingMemory: OpeningMemoryPort = noOpeningMemory) {
     this.game = game;
   }
 
@@ -67,8 +70,10 @@ export class Controller {
           const assessed = selected ?? this.analysis;
           const offerDraw = this.game.cursor >= 40 && this.game.cursor - this.lastDrawOffer >= 20
             && assessed && assessed.depth >= 8 && assessed.score.kind === 'cp' && Math.abs(assessed.score.value) <= 20;
+          const freshOpening = this.openings[this.game.cursor]?.[side] === undefined && message.opening;
           const plans = { ...this.openings[this.game.cursor], [side]: message.opening ?? null };
           const played = this.game.play(message.move);
+          if (freshOpening) this.openingMemory.remember({ lineId: freshOpening, move: message.move });
           this.notifyMove(played, false);
           if (this.drawOffer === 'human') this.drawNotice = 'Talbot declined the draw';
           this.drawOffer = undefined;
@@ -126,6 +131,7 @@ export class Controller {
         deadline: game.humanTurn ? undefined : this.deadline,
         multipv: SEARCH_MULTIPV,
         opening: this.openings[game.cursor]?.[game.chess.turn()],
+        recentOpenings: this.openingMemory.recent(),
       });
       if (!game.humanTurn) {
         // Do not leave the user waiting indefinitely after a worker crash/hang.

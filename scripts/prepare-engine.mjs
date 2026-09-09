@@ -13,6 +13,8 @@ function patch(file, from, to) {
 }
 
 patch('utils.h', 'typedef unsigned __int128 uint128_t;', '// Talbot: portable multiply-high below; Hash is limited to 32 MB.');
+patch('utils.h', '  std::vector<RootMoveInfo> root_moves;',
+  '  std::vector<RootMoveInfo> root_moves;\n  std::vector<Move> talbot_root_filter;');
 patch('utils.h', 'return (uint128_t(hash) * uint128_t(TT_size)) >> 64;',
   'return ((hash >> 32) * TT_size + (((hash & 0xffffffffULL) * TT_size) >> 32)) >> 32;');
 // With a single search thread these barriers have no work to synchronize.
@@ -29,6 +31,16 @@ patch('search.h', 'bool out_of_time(ThreadInfo &thread_info) {',
 // Experimental Talbot style: keep Feanor for non-endgame search roots.
 patch('search.h', 'if (depth >= 6 && total_mat(position) >= PhaseBound) {',
   'if (false && depth >= 6 && total_mat(position) >= PhaseBound) {');
+patch('search.h', '    for (int i = 0; i < nmoves; i++) {\n      thread_info.root_moves.push_back({raw_root_moves[i], 0});\n    }',
+  '    for (int i = 0; i < nmoves; i++) {\n' +
+  '      bool allowed = thread_info.talbot_root_filter.empty();\n' +
+  '      for (Move move : thread_info.talbot_root_filter) allowed |= move == raw_root_moves[i];\n' +
+  '      if (allowed) thread_info.root_moves.push_back({raw_root_moves[i], 0});\n' +
+  '    }');
+patch('search.h', '    // skip various excluded moves\n    if (root) {',
+  '    // Talbot: a focused stage may restrict legal root moves.\n' +
+  '    if (root && !find_root_move(thread_info, move)) continue;\n\n' +
+  '    // skip various excluded moves\n    if (root) {');
 // Guarantee a legal answer even when stopped before the first completed depth.
 patch('search.h', 'Move prev_best = MoveNone;',
   'if (thread_info.root_moves.empty()) { printf("bestmove 0000\\n"); return; }\n' +

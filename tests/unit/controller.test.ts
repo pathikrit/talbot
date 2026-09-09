@@ -215,6 +215,25 @@ describe('search lifecycle', () => {
     controller.play('e2e4');
     expect(search().opening).toBeUndefined();
   });
+  it('passes bounded opening memory to searches and records only fresh committed choices', () => {
+    controller.dispose();
+    const memory = {
+      recent: vi.fn(() => [{ lineId: 'recent-line', move: 'e7e5' }]),
+      remember: vi.fn(),
+    };
+    controller = new Controller({ postMessage: message => requests.push(message) }, () => {}, undefined,
+      undefined, memory);
+    controller.receive({ type: 'ready' });
+    expect(search().recentOpenings).toEqual([{ lineId: 'recent-line', move: 'e7e5' }]);
+    controller.play('e2e4');
+    controller.receive({ type: 'bestmove', id: search().id, move: 'e7e5', opening: 'stafford-line' });
+    vi.advanceTimersByTime(1000);
+    expect(memory.remember).toHaveBeenCalledWith({ lineId: 'stafford-line', move: 'e7e5' });
+    controller.play('g1f3');
+    controller.receive({ type: 'bestmove', id: search().id, move: 'b8c6', opening: 'stafford-line' });
+    vi.advanceTimersByTime(1000);
+    expect(memory.remember).toHaveBeenCalledTimes(1);
+  });
   it('discards future book choices on a branch and never commits a cancelled choice', () => {
     controller.play('e2e4');
     controller.receive({ type: 'bestmove', id: search().id, move: 'e7e5', opening: 'cancelled' });

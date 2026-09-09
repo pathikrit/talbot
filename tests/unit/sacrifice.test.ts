@@ -1,6 +1,7 @@
 import { Chess } from 'chess.js';
 import { describe, expect, it } from 'vitest';
-import { CandidateSet, chooseSacrifice, offersSacrifice, sacrificeSize } from '../../src/engine/sacrifice';
+import { CandidateSet, chooseSacrifice, lineSacrificeSize, offersSacrifice, sacrificePotential,
+  sacrificeSize, shortlistCandidates } from '../../src/engine/sacrifice';
 import { parseInfo } from '../../src/engine/protocol';
 import { settings } from '../../src/settings';
 
@@ -75,12 +76,22 @@ describe('candidate ranking', () => {
     const set = new CandidateSet(3);
     set.add(info(1, 'h1g1', 50));
     set.add(info(2, 'b2b4 a8b8', 40));
-    set.add(info(3, 'g2e3 a8b8', 0));
+    set.add(info(3, 'g2e3 a8b8', 50 - settings.maxSacrificeLossCp));
     expect(chooseSacrifice(fen, set, 'h1g1', performance.now() + 2000)?.pv[0]).toBe('g2e3');
     set.add(info(1, 'h1g1', 50, 8));
     set.add(info(2, 'b2b4 a8b8', 40, 8));
-    set.add(info(3, 'g2e3 a8b8', -1, 8));
+    set.add(info(3, 'g2e3 a8b8', 49 - settings.maxSacrificeLossCp, 8));
     expect(chooseSacrifice(fen, set, 'h1g1', performance.now() + 2000)?.pv[0]).toBe('b2b4');
+  });
+  it('finds and verifies a sacrifice after a quiet setup move', () => {
+    const quiet = ['h1g1', 'a8b8', 'e3e4', 'b8a8'];
+    expect(sacrificePotential(pawnOffer, quiet)).toBe(100);
+    expect(lineSacrificeSize(pawnOffer, quiet, { expires: performance.now() + 2000, nodes: 10000 })).toBe(100);
+    const set = new CandidateSet(2);
+    set.add(info(1, 'h1h2 a8b8', 50));
+    set.add(info(2, quiet.join(' '), 0));
+    expect(shortlistCandidates(pawnOffer, set, 'h1h2', 2)).toEqual(['h1h2', 'h1g1']);
+    expect(chooseSacrifice(pawnOffer, set, 'h1h2', performance.now() + 2000)?.pv[0]).toBe('h1g1');
   });
   it('measures net material rather than the captured piece face value', () => {
     const budget = () => ({ expires: performance.now() + 2000, nodes: 10000 });

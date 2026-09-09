@@ -9,6 +9,19 @@ static std::unique_ptr<ThreadInfo> info;
 static Position board;
 static bool busy = false;
 
+static void run_search(int milliseconds, int depth, int multipv) {
+  busy = true;
+  info->max_iter_depth = depth > 0 ? std::clamp(depth, 1, MaxSearchDepth) : MaxSearchDepth;
+  info->multipv = std::clamp(multipv, 1, 255);
+  info->max_nodes_searched = UINT64_MAX / 2;
+  info->opt_nodes_searched = UINT64_MAX / 2;
+  info->max_time = milliseconds < 0 ? INT32_MAX / 2 : std::max(1, milliseconds);
+  info->opt_time = INT32_MAX / 2;
+  info->start_time = std::chrono::steady_clock::now();
+  search_position(board, *info, TT);
+  busy = false;
+}
+
 extern "C" {
 TALBOT_EXPORT void talbot_init() {
   setvbuf(stdout, nullptr, _IONBF, 0);
@@ -55,16 +68,32 @@ TALBOT_EXPORT int talbot_position(const char *fen, const char *moves) {
 
 TALBOT_EXPORT void talbot_search(int milliseconds, int depth, int multipv) {
   if (busy) return;
-  busy = true;
-  info->max_iter_depth = depth > 0 ? std::clamp(depth, 1, MaxSearchDepth) : MaxSearchDepth;
-  info->multipv = std::clamp(multipv, 1, 255);
-  info->max_nodes_searched = UINT64_MAX / 2;
-  info->opt_nodes_searched = UINT64_MAX / 2;
-  info->max_time = milliseconds < 0 ? INT32_MAX / 2 : std::max(1, milliseconds);
-  info->opt_time = INT32_MAX / 2;
-  info->start_time = std::chrono::steady_clock::now();
-  search_position(board, *info, TT);
-  busy = false;
+  info->talbot_root_filter.clear();
+  run_search(milliseconds, depth, multipv);
+}
+
+// Focus a second stage on UCI roots chosen from the broad MultiPV pass.
+TALBOT_EXPORT void talbot_search_moves(int milliseconds, int depth, int multipv,
+                                       const char *moves) {
+  if (busy) return;
+  info->talbot_root_filter.clear();
+  std::array<Move, ListSize> legal;
+  const int count = legal_movegen(board, legal);
+  std::istringstream stream(moves);
+  std::string uci;
+  while (stream >> uci) {
+    for (int i = 0; i < count; ++i) {
+      if (internal_to_uci(board, legal[i]) == uci &&
+          std::find(info->talbot_root_filter.begin(), info->talbot_root_filter.end(), legal[i]) ==
+              info->talbot_root_filter.end()) {
+        info->talbot_root_filter.push_back(legal[i]);
+      }
+    }
+  }
+  if (info->talbot_root_filter.empty()) return;
+  run_search(milliseconds, depth,
+             std::min<int>(multipv, info->talbot_root_filter.size()));
+  info->talbot_root_filter.clear();
 }
 
 uint64_t count_nodes(Position &position, int depth) {
