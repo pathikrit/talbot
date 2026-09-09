@@ -6,6 +6,8 @@ export interface SearchRequest {
   /** Absolute performance.timeOrigin + performance.now(); absent = ponder. */
   deadline?: number;
   multipv?: number;
+  /** undefined = may choose early; string = committed line; null = out of book. */
+  opening?: string | null;
 }
 export type EngineRequest =
   | { type: 'init'; assetBase: string }
@@ -25,7 +27,7 @@ export interface Analysis {
 export type EngineResponse =
   | { type: 'ready' }
   | { type: 'info'; id: number; analysis: Analysis }
-  | { type: 'bestmove'; id: number; move: string; selected?: Analysis }
+  | { type: 'bestmove'; id: number; move: string; selected?: Analysis; opening?: string | null }
   | { type: 'error'; message: string };
 
 export function parseInfo(line: string): Analysis | undefined {

@@ -17,6 +17,47 @@ beforeEach(() => {
 afterEach(() => { controller.dispose(); vi.useRealTimers(); });
 
 describe('search lifecycle', () => {
+  it('records book choices only with committed moves and restores them through undo/redo', () => {
+    controller.play('e2e4');
+    controller.receive({ type: 'bestmove', id: search().id, move: 'e7e5', opening: 'stafford-line' });
+    vi.advanceTimersByTime(1000);
+    controller.undo();
+    expect(controller.game.cursor).toBe(0);
+    controller.redo();
+    controller.play('g1f3');
+    expect(search().opening).toBe('stafford-line');
+    controller.newGame();
+    controller.play('e2e4');
+    expect(search().opening).toBeUndefined();
+  });
+  it('discards future book choices on a branch and never commits a cancelled choice', () => {
+    controller.play('e2e4');
+    controller.receive({ type: 'bestmove', id: search().id, move: 'e7e5', opening: 'cancelled' });
+    controller.undo();
+    vi.advanceTimersByTime(1000);
+    controller.play('d2d4');
+    expect(search().opening).toBeUndefined();
+    controller.receive({ type: 'bestmove', id: search().id, move: 'd7d5', opening: 'old-line' });
+    vi.advanceTimersByTime(1000);
+    controller.undo();
+    controller.play('e2e4');
+    expect(search().opening).toBeUndefined();
+  });
+  it('remembers leaving the book and keeps side-specific choices when swapped', () => {
+    controller.play('e2e4');
+    controller.receive({ type: 'bestmove', id: search().id, move: 'e7e5', opening: 'black-line' });
+    vi.advanceTimersByTime(1000);
+    controller.swap();
+    expect(search().opening).toBeUndefined();
+    controller.receive({ type: 'bestmove', id: search().id, move: 'g1f3', opening: null });
+    vi.advanceTimersByTime(1000);
+    controller.swap();
+    expect(search().opening).toBe('black-line');
+    controller.receive({ type: 'bestmove', id: search().id, move: 'b8c6', opening: null });
+    vi.advanceTimersByTime(1000);
+    controller.play('f1c4');
+    expect(search().opening).toBeNull();
+  });
   it('uses internal search breadth during both pondering and timed play', () => {
     expect(search().multipv).toBe(SEARCH_MULTIPV);
     controller.play('e2e4');

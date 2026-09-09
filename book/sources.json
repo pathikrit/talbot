@@ -1,0 +1,18 @@
+[
+  {
+    "id": "lichess",
+    "repo": "lichess-org/chess-openings",
+    "revision": "4b8622759e7ae6f93f011cc6c83a3823401ab45e",
+    "license": "CC0-1.0",
+    "licenseFile": "COPYING.txt",
+    "files": ["a.tsv", "b.tsv", "c.tsv", "d.tsv", "e.tsv"]
+  },
+  {
+    "id": "eco",
+    "repo": "JeffML/eco.json",
+    "revision": "36cfd9227f553dec1d39ee20fa0775eea8f8e165",
+    "license": "MIT",
+    "licenseFile": "LICENSE",
+    "files": ["ecoA.json", "ecoB.json", "ecoC.json", "ecoD.json", "ecoE.json"]
+  }
+]

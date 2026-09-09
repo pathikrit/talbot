@@ -120,8 +120,7 @@ embedded and their hashes are recorded in `public/engine/provenance.json`.
 
 This is not an upstream “maximum aggression” setting, a measured strength claim,
 or a guarantee that every game contains a sacrifice. No deliberately weakened
-human-skill mode, random sacrifices, book, or Stockfish guardrail is enabled.
-Gambit preferences are deferred to a later version.
+human-skill mode, random sacrifices, or Stockfish guardrail is enabled.
 
 Patricia supports MultiPV 1–255, capped at the number of legal root moves.
 The typed worker interface accepts `multipv` and returns indexed analysis with
@@ -174,6 +173,47 @@ but its speculative candidates are never reused as actual-root evidence.
 Chosen moves return their own analysis/PV so evaluation and the next ponder
 prediction match the move actually played. Cancelled jobs must not select or
 emit a result. The controller still holds early replies until the deadline.
+
+### Opening repertoire
+
+`book/opening-book.json` is a checked-in, offline-compiled book: 486 legal lines
+in 26 explicitly side-tagged families, with gambits/traps weighted above ordinary
+openings. It includes Alien, Evans, King's, Queen's, Stafford, and named traps.
+The initial draw selects a family by weight, then a distinct move, then a line;
+duplicate source records or prolific families do not increase family probability.
+Choose once, on the first available engine turn within the first four plies.
+After that, follow that exact line, not a new random branch every move. Compatible
+same-position transpositions are supported without rewinding along the line.
+
+Book choices require the same complete, depth >= 4, common-depth MultiPV batch
+and configured cp allowance as the sacrifice selector. No mate-score override,
+unsearched move, or forced unsound gambit. On a deviation, line end, missing
+candidate, or failed evaluation guard, permanently leave the book on that branch
+and use largest-sacrifice selection, then Patricia's best move. A book line is
+preferred to other sacrifices while it qualifies, including preparatory moves.
+Opening lookup is worker-only and local; normal engine thinking and pondering
+continue even in book positions. Speculative searches never choose a book line.
+
+The controller stores per-color opening plans with each history cursor, only
+when a real move commits. Undo/redo restores plans without rerandomizing recorded
+moves; a new branch discards future plans, swaps keep plans attached to their
+playing side, and New game clears all plans. Custom starting FENs do not enter
+the book. Keep all of this out of the minimal UI and settings.json.
+
+Maintenance: `npm run book:compile` regenerates the book offline;
+`npm run book:check` verifies reproducibility and is a CI gate. To deliberately
+refresh upstream data, update book/sources.json pins and run
+`node scripts/compile-book.mjs --download`, then review source/provenance changes.
+Normal make dev/build/bootstrap does not download or regenerate the book.
+Source snapshots are compressed under book/sources, and licenses under book/licenses.
+Lichess is CC0. From MIT eco.json retain only eco_js and CC0 eco_tsv records;
+strip aliases and omit imports from other differently licensed sources even
+from archived compiler inputs. book/provenance.json records snapshot hashes,
+source revisions, excluded origins, rejected PGNs and per-line attribution.
+The explicit family allowlist in book/families.json identifies the gambit/trap
+playing side; do not auto-enable every named trap for both sides. Unknown or
+ambiguous families stay excluded. Keep book/ in corresponding-source packaging,
+ship both license texts in public/licenses, and leave README edits to the user.
 
 ## Browser engine architecture
 

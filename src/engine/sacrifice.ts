@@ -129,16 +129,21 @@ export function offersSacrifice(fen: string, pv: string[], budget: ProbeBudget):
   return sacrificeSize(fen, pv, budget) >= 100;
 }
 
-export function chooseSacrifice(fen: string, candidates: CandidateSet, fallback: string,
-  expires = performance.now() + 80): Analysis | undefined {
+/** Shared safety gate for book moves and material-sacrifice selection. */
+export function eligibleCandidates(candidates: CandidateSet, fallback: string): Analysis[] {
   const batch = candidates.complete;
   // Mate scores aren't centipawns. Preserve engine mating decisions, including
   // a mate discovered during the next incomplete iteration.
   if (candidates.latestBest?.score.kind === 'mate' || !batch.length || batch[0].depth < 4
-    || batch.some(info => info.score.kind !== 'cp') || !batch.some(info => info.pv[0] === fallback)) return;
+    || batch.some(info => info.score.kind !== 'cp') || !batch.some(info => info.pv[0] === fallback)) return [];
   const best = Math.max(...batch.map(info => info.score.value));
-  const eligible = batch.filter(info => best - info.score.value <= settings.maxSacrificeLossCp)
+  return batch.filter(info => best - info.score.value <= settings.maxSacrificeLossCp)
     .sort((a, b) => b.score.value - a.score.value || a.multipv - b.multipv);
+}
+
+export function chooseSacrifice(fen: string, candidates: CandidateSet, fallback: string,
+  expires = performance.now() + 80): Analysis | undefined {
+  const eligible = eligibleCandidates(candidates, fallback);
   const budget = { expires, nodes: 1500 };
   let selected: Analysis | undefined;
   let largest = 0;

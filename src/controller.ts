@@ -1,4 +1,5 @@
 import { Chess } from 'chess.js';
+import type { Color } from 'chess.js';
 import { Game } from './game';
 import { now } from './engine/protocol';
 import { whiteEvaluation } from './evaluation';
@@ -23,6 +24,7 @@ export class Controller {
   private deadline = 0;
   private moveTimer?: ReturnType<typeof setTimeout>;
   private watchdog?: ReturnType<typeof setTimeout>;
+  private openings: Partial<Record<Color, string | null>>[] = [{}];
 
   constructor(private engine: EnginePort, private changed: () => void, game = new Game()) {
     this.game = game;
@@ -54,7 +56,11 @@ export class Controller {
             this.analysis = selected;
             this.evaluation = whiteEvaluation(selected.score, this.game.chess.turn());
           }
+          const side = this.game.chess.turn();
+          const plans = { ...this.openings[this.game.cursor], [side]: message.opening ?? null };
           this.game.play(message.move);
+          this.openings = this.openings.slice(0, this.game.cursor);
+          this.openings[this.game.cursor] = plans;
           this.prediction = pv?.[0] === message.move ? pv[1] : undefined;
           this.sync(true);
         } catch { this.fail(`Patricia returned an invalid move (${message.move}). Reload the page to retry.`); }
@@ -99,6 +105,7 @@ export class Controller {
         position: { fen: game.initialFen, moves },
         deadline: game.humanTurn ? undefined : this.deadline,
         multipv: SEARCH_MULTIPV,
+        opening: this.openings[game.cursor]?.[game.chess.turn()],
       });
       if (!game.humanTurn) {
         // Do not leave the user waiting indefinitely after a worker crash/hang.
@@ -110,7 +117,10 @@ export class Controller {
 
   play(uci: string): void {
     if (!this.ready || this.error || !this.visible || !this.game.humanTurn) return;
+    const plans = { ...this.openings[this.game.cursor] };
     this.game.play(uci);
+    this.openings = this.openings.slice(0, this.game.cursor);
+    this.openings[this.game.cursor] = plans;
     this.prediction = undefined;
     this.sync();
   }
@@ -120,6 +130,7 @@ export class Controller {
   resume(): void { this.game.reviewing = false; this.sync(); }
   newGame(): void {
     this.game.reset();
+    this.openings = [{}];
     this.prediction = undefined;
     this.engine.postMessage({ type: 'reset' });
     this.sync();

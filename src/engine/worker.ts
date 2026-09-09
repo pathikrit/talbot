@@ -1,6 +1,7 @@
 import { Chess } from 'chess.js';
 import { now, parseInfo } from './protocol';
 import { CandidateSet, chooseSacrifice, SELECTOR_RESERVE_MS } from './sacrifice';
+import { openingBook } from './openings';
 import type { EngineRequest, EngineResponse, SearchRequest } from './protocol';
 
 interface PatriciaModule {
@@ -54,11 +55,14 @@ async function drain(): Promise<void> {
         await engine.ccall('talbot_search', null, ['number', 'number', 'number'],
           [remaining, 0, job.multipv ?? 1], { async: true });
         if (bestmove && active === job) {
-          const selected = job.deadline === undefined ? undefined : chooseSacrifice(
+          const book = job.deadline === undefined ? undefined : openingBook.choose(
+            position, job.position, candidates, bestmove, job.opening,
+          );
+          const selected = book?.analysis ?? (job.deadline === undefined ? undefined : chooseSacrifice(
             position.fen(), candidates, bestmove,
             performance.now() + Math.max(0, Math.min(80, job.deadline - now() - 5)),
-          );
-          send({ type: 'bestmove', id: job.id, move: selected?.pv[0] ?? bestmove, selected });
+          ));
+          send({ type: 'bestmove', id: job.id, move: selected?.pv[0] ?? bestmove, selected, opening: book?.lineId ?? null });
         }
       } finally { clearTimeout(timer); active = undefined; }
     }

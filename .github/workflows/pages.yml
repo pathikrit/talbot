@@ -30,6 +30,7 @@ jobs:
           key: ${{ runner.os }}-${{ runner.arch }}-emscripten-6.0.9-patricia-f1ee427
       - run: make bootstrap
       - run: make test
+      - run: npm run book:check
       - run: make gh-page
       - name: Disable unused Chrome apt repository
         # Playwright downloads its own browsers. A stale Google apt mirror must

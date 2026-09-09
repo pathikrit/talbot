@@ -1,0 +1,3594 @@
+{
+  "sources": [
+    {
+      "id": "lichess",
+      "repo": "lichess-org/chess-openings",
+      "revision": "4b8622759e7ae6f93f011cc6c83a3823401ab45e",
+      "license": "CC0-1.0",
+      "licenseFile": "COPYING.txt",
+      "files": [
+        "a.tsv",
+        "b.tsv",
+        "c.tsv",
+        "d.tsv",
+        "e.tsv"
+      ]
+    },
+    {
+      "id": "eco",
+      "repo": "JeffML/eco.json",
+      "revision": "36cfd9227f553dec1d39ee20fa0775eea8f8e165",
+      "license": "MIT",
+      "licenseFile": "LICENSE",
+      "files": [
+        "ecoA.json",
+        "ecoB.json",
+        "ecoC.json",
+        "ecoD.json",
+        "ecoE.json"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "source": "lichess",
+      "file": "a.tsv",
+      "sha256": "41722fa3d44f294357326fe2ca1b956d9e56490b30efcfa68db61114c9df7e10"
+    },
+    {
+      "source": "lichess",
+      "file": "b.tsv",
+      "sha256": "310f0997d5a26ac6c9abfabac028e47e78f24356a6ba322cfffbf8f5a3f88d25"
+    },
+    {
+      "source": "lichess",
+      "file": "c.tsv",
+      "sha256": "b2e64f32e42e6418b327d03a55af65f3a18e762f7cbc0efffc7e9d1ed3aa7343"
+    },
+    {
+      "source": "lichess",
+      "file": "d.tsv",
+      "sha256": "58cad40b886bd499717eabcce281d4bfcf00eeadbdc00552f42042cf4aac50d2"
+    },
+    {
+      "source": "lichess",
+      "file": "e.tsv",
+      "sha256": "f1f8494f488f660e284f23527d5acfbeccdbbc3acc76e74f05d125f39d2f8a74"
+    },
+    {
+      "source": "lichess",
+      "file": "COPYING.txt",
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+    },
+    {
+      "source": "eco",
+      "file": "ecoA.json",
+      "sha256": "832a93011822bdd9916cc341ec4d0d5187d1dbdd44ad2adad601fe3637792ce3"
+    },
+    {
+      "source": "eco",
+      "file": "ecoB.json",
+      "sha256": "b1e943a90b4a2b26b4081f6e27285dc3cd5c4855a6c6fa1a70b47d6f0325a407"
+    },
+    {
+      "source": "eco",
+      "file": "ecoC.json",
+      "sha256": "86be6cf4a6d9560565c8afd2c67f4524adc9db6a6769edfe38e36a1cda56415b"
+    },
+    {
+      "source": "eco",
+      "file": "ecoD.json",
+      "sha256": "9be1cd16021dceed74f237aaf86f3182fc8a51932813b6d92c8ba433b552a837"
+    },
+    {
+      "source": "eco",
+      "file": "ecoE.json",
+      "sha256": "c2be49a9eb64c87082170f82058fa2abf30b5b90fd2e394725f7b624eef642d0"
+    },
+    {
+      "source": "eco",
+      "file": "LICENSE",
+      "sha256": "1fe0b49b2d842cd5284eba26478fa4aa8bd7da8cae7a1045b5bb329eb94fe888"
+    }
+  ],
+  "excludedOrigins": [
+    "chessGraph",
+    "ct",
+    "eco_wikip",
+    "eco_wikip.g",
+    "icsbot",
+    "pgn",
+    "scid",
+    "wiki_b"
+  ],
+  "rejected": [],
+  "families": [
+    {
+      "id": "alien",
+      "side": "w",
+      "lines": 1
+    },
+    {
+      "id": "evans",
+      "side": "w",
+      "lines": 27
+    },
+    {
+      "id": "kings",
+      "side": "w",
+      "lines": 103
+    },
+    {
+      "id": "queens",
+      "side": "w",
+      "lines": 154
+    },
+    {
+      "id": "danish",
+      "side": "w",
+      "lines": 6
+    },
+    {
+      "id": "scotch",
+      "side": "w",
+      "lines": 17
+    },
+    {
+      "id": "morra",
+      "side": "w",
+      "lines": 22
+    },
+    {
+      "id": "vienna",
+      "side": "w",
+      "lines": 15
+    },
+    {
+      "id": "goring",
+      "side": "w",
+      "lines": 2
+    },
+    {
+      "id": "blackmar",
+      "side": "w",
+      "lines": 32
+    },
+    {
+      "id": "halloween",
+      "side": "w",
+      "lines": 2
+    },
+    {
+      "id": "stafford",
+      "side": "b",
+      "lines": 2
+    },
+    {
+      "id": "budapest",
+      "side": "b",
+      "lines": 6
+    },
+    {
+      "id": "albin",
+      "side": "b",
+      "lines": 9
+    },
+    {
+      "id": "benko",
+      "side": "b",
+      "lines": 19
+    },
+    {
+      "id": "falkbeer",
+      "side": "b",
+      "lines": 14
+    },
+    {
+      "id": "elephant",
+      "side": "b",
+      "lines": 3
+    },
+    {
+      "id": "latvian",
+      "side": "b",
+      "lines": 21
+    },
+    {
+      "id": "englund",
+      "side": "b",
+      "lines": 12
+    },
+    {
+      "id": "marshall",
+      "side": "b",
+      "lines": 5
+    },
+    {
+      "id": "noahs-ark",
+      "side": "b",
+      "lines": 2
+    },
+    {
+      "id": "mortimer",
+      "side": "b",
+      "lines": 1
+    },
+    {
+      "id": "lasker-trap",
+      "side": "b",
+      "lines": 1
+    },
+    {
+      "id": "legal-trap",
+      "side": "w",
+      "lines": 0
+    },
+    {
+      "id": "italian",
+      "side": "w",
+      "lines": 4
+    },
+    {
+      "id": "sicilian",
+      "side": "b",
+      "lines": 2
+    },
+    {
+      "id": "french",
+      "side": "b",
+      "lines": 4
+    }
+  ],
+  "attribution": [
+    {
+      "id": "00210b8424462fd1",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "00ad902718c156e9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "03133e00dbecf7e3",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "036c9719a7b0fe98",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "038445635b4abae8",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "043a2c5dc4fe790f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "04da38ac0564d25f",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "053f4edfa7ba3b37",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "06cde4f825e36978",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "06d3af6852d54138",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "0717229f6ca29c7a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "07956959bacc6c2a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "079c678f97887d00",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "080c92a27a6a8418",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "081d1abd99024a98",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "08e462270ae2c675",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "0960fe0ce8eb7f62",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "0a109196e2285915",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "0ad71f4f2116d339",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "0b4adcda95e60799",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "0b5c512faf335080",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "0be6d4fd019afd31",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "0c826705617328b5",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "0d687ceb55dc3b02",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "0e3ca9df4aedf4f5",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "0e3e01dc0512e438",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "0e7d8c0d210cff92",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "0f4698ed8b223267",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "0fa2c0b5d0edcde1",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1090191ff8625cf8",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "111d0bc3ad057576",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1159e195ea0853e6",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "11c59094936bf284",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "11cdde12b911315f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "11cfb29d2ced58a7",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "124bc489e4758b3b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1355656245d81210",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1376ac4efaaac0d4",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1389afed987f1393",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "13bb63dd8ee54161",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "13d0b59eb78d9867",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1577107cc294c62b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "15d1de42c025f08a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "15dd34b0f5bc775b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "18680ebef3bbda20",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1930512d5604f2cd",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1a639dcb5c9fd5c6",
+      "sources": [
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1a813ef4c9d79a9e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1aca92c85791eb40",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1bbcca00ba7d5489",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1c1b4856a0515a71",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1c5ec615057a7642",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1d846857b22ab2ca",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1db587ade1e36862",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1e4f39f722bafe17",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1e80aae5c38c40ae",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "1ecac488d4ce11a3",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1eee7f2ab591ef59",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "1f8e23fb2feb24dc",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "20222e7fa7ba6225",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "20b319eacae67f51",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "20c950a5479349e4",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "20ea88a5c6b54db7",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "21bb7f70d5e32e40",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "223eade33ab3887d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "22ab7ff06ed46a50",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "22b7c15d16c870ad",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "235122fb05202194",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "250b0075d4a21c0f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "252ec34e40b28993",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2530c10c5a761ee9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "25435bedbc621938",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "259a160ef79df158",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2640a6155220bcdd",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2850ea8f843d51cf",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2871e8c69c2f6800",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "28b78847dfe70b2c",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "28c199a8e905550b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "297af15592431261",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2a267354b9e0bc02",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2a3d145053ed6153",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2a96395421bcc725",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2b41ade6502472c8",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2bfbe47a69fee4c6",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "2c67afbff42e6bbc",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2cbbc4b0f83fd733",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "2cf31200d8df1195",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2d23a7e719f257fc",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "2d26803fa00eef98",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2d38ea8f73f06160",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2d7590fe859c02fc",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2dc950baefd5cc2b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2de581a025dacdcb",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2df1bd177f5752b9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2e56b7431728dcb6",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2e803b75806a2f43",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "2f1369201d174c06",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "30664d545a2ebece",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "31216bf5f97b36d0",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "32c17609ab058d98",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "32ee04c68f328ce6",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "32f4f8930a2a0231",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "33380790fe10b08d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "33dbb86171fc5866",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "34750524bf7e80b5",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "355abb416f66cc59",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "35dc98c7a494c0f8",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "3614d13d453052bf",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "361dc9626a42c70f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "36cad48ce20473cd",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "36cda9ab75b64224",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "372f21630d4f9e7b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "37516054ea03f562",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3760d41fee9582c1",
+      "sources": [
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3762cb6d6d8e6577",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "37be5d88bef97cf2",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "38c69dabaefe822b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "39117ed29e27d0b2",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "397aa450a73b43c9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "399b9e03a2722485",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3b0ae33b967839bc",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3b3ec51d5d93f360",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3bad896204e9c412",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3bdd72bcb834be09",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3c341b86285fdd33",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3c9f92bd35baa3bc",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3cc69b0b961d7842",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3d6c0f657ac4dd4c",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3d9ebacf099e92e9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3dac76c485499cbc",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3e8e786af10b3547",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3eec0f9d12bea34f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "3f8d8cd4c7d0b14c",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "41d3f826e6d2859e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "425e08f11074ad08",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4309cba1ffac8afa",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "433f232daa78c3c7",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "43490dbe05828aeb",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4505cad53f75dfe2",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4564e1d0355eaa10",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4586a7d8b247d525",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4715b947c56acfac",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "47489a5833aca0fd",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4776d70671e41232",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "47f0db76bd23010f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4895f8cda84a600a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "48b4f754f0a29b6e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "49066fe8fd5bfad0",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "494043112894afe1",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "496b038348e548bb",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "497e5f27c1656ccf",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "49fdf76e2d111a95",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4aff9abea8df127c",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4b45aacb6716c640",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4b6d8061e33215eb",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4bb29c4af4b3c48d",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "4d1ab0aaba66ed7b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4d67e27f73aa0fa8",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4dc351208ff37775",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "4ecbcc654945614f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4f5181ed84821f5d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4f594502cebd0405",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4f8cb95d36d1a1d5",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4fc63c182aee15fd",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "4ff24c8f443464e2",
+      "sources": [
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5119ee18b1d1dbbb",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "51a681ef5817be60",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "51c1b54d4c09eef2",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "53669925af3b0dc4",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5390451b2925f636",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "53aba06864932ca6",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "53ac4aec057f1e0f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "53d34f43b76bac25",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "541acfba358328bd",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "54b18d7b491fb910",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5516c7026955a8a9",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "556f61e957f6a90a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "55bf0a80eb0eb423",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5624689afe74c023",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "563040b074d44b08",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5661116fe2728e54",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "566d5f5404919718",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "57fe0c491fbfdb1d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "58348c73d4e091b9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5abb4a318d4d0390",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5adb1b723f76409d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5afb5fc24fcba47a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5bd7fcd12c6417b4",
+      "sources": [
+        "eco:eco_js"
+      ]
+    },
+    {
+      "id": "5cc72c4e45f7cd22",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5d186920dd8441a0",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5d2bc35c0bbad6c7",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5d79e97ef2d40f10",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5ebbc86927eb85ce",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5f1a6c341177e26e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "5f42d330863c9ae6",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "6087fb4bc9c17c1e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "61db4221c416bcd1",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "61fad99bef8b9895",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "620c337d03a870a8",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "6237903a8af4e5d0",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "625d40342bb85854",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "627b30d4a902ff3d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "62cef7e2e92bdd79",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "62fe181316761add",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "64148d6c1242223f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "641c94bd9958036a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "65132b19431967f2",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "65a29e4ebe6f5b3e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "65ea55be773c6673",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "66205cdb345adc43",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "674a44a3cb6ba31d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "67814cbc0c21ed93",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "68b500fca6911217",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "68f2a7b47a3e97de",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "69f6fe042c3b6b81",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "6a06db8af20a8793",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "6b988cddbbac1f2c",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "6d18bdcca75da01f",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "6ddb7202536e9073",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "6de006496fd5d10a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "6e4568969125905e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "6ec99d0410ba71fc",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "703047faf8cce3da",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7042ed82121a9572",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "70b5d5cae7fa445e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "70caa918c266ce53",
+      "sources": [
+        "eco:eco_js"
+      ]
+    },
+    {
+      "id": "71290019b55d1450",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7146a0ed89c7b044",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "72d5c2f8d23d1b2e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7307eead315c7aae",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "736a909c1956a7c6",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "740a154fbe512e57",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7432f2aa5d22f9f2",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "74655bd9cca58c43",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "74a9ca7d0f2507c8",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "74b4e705188687b1",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "74c4db54b53940df",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7531c0095a6c483c",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "75f73fdda75125e5",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "76e85a783c3ebe1b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7739030e3256eb8f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "774b8fa844638b73",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "783b1eb43f96d3b8",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "78b802dcb444ef90",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7915b7deaab573a8",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7ad52eafb8423a17",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7b471e7275390c1f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7b49aebdfb26e8dd",
+      "sources": [
+        "eco:eco_js"
+      ]
+    },
+    {
+      "id": "7c98692182235b74",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7d48d4e66cd54c4b",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "7d6be27328611227",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7da49f7fc283c1ac",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7ed196fb006ca334",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7ee872ff8002f3e7",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7ee96aea96938a84",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "7fd8d31f60eeb2a9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "80355c1f9f50ead2",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "8178cd3057050904",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "81f9111cdb1794d6",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "820551bfa702d3d0",
+      "sources": [
+        "eco:eco_js"
+      ]
+    },
+    {
+      "id": "824c8ae052fff91d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "828d9fab960e05b1",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "831e03b822c2df8a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "833c738b4985c171",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "8359f717b4b5c7cf",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "8410c6f663722f55",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "84cc468ccd034c30",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "855e71a52f683a95",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "858f85cbdc87e344",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "86efdf8cd0f69ca8",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "87e4761cccc7a2c5",
+      "sources": [
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "882841231216c4f8",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "89aff51b226e77dd",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "8a21137981e2dc8b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "8a3f255766652bf4",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "8a9a5849a7a44a8a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "8af28fb287cd66d6",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "8bb81f436ec8dbda",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "8c05051c45850477",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "8c1646a60514c053",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "8c8d171e04d2f74b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "8d480b87b7da73a8",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "8d48c16a6f10fbd0",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "8ea4f669af1dbef8",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "8ee692fe7bb4e7c5",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "8fbb95ffc7d1414b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "8fde0515cb5e65d4",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "900fa1299f9fa22f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "905970f3e313445b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "9099610b3a716116",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "91af86ac75ade1e6",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "92c0cab1adb59a58",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "932910c8a2a7f19b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "9329daa20b5992a4",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "93a9c1313472891a",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "93c938138ad2765f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "943d021ec45c76c1",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "94f4aa858c2a0d16",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "968e0a27166fe90f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "96cb9edf153b629e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "96f53bc6d0a39148",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "971471fca29fb8c2",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "97a2cfc3d7aa615e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "98341fa09a65633e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "9856e0c26aa2070d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "98ffaf682394a41e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "996a7e465792cf73",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "99ae96452ef992dd",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "99c32b3fcacdef7d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "9a49b6228e800120",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "9b5e9a294c59cf0b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "9be8ee371a06576b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "9cceacec5b045ca9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "9ce522a9c4cca6d4",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "9ce66c90bc385ecb",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "9cf27f95eefd8664",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "9de619107fb24916",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "9ed316fdf4d0fa58",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a05f3e584d382a56",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a15f13f9df680088",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a26dde90ed0011e0",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a2a045b0a7ea430d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a2fbc9699c1d594f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a311f51c59dbb466",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a388a33a842e4ace",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a4e9a3dadc274aa3",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a5602ef0f850aaae",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a596a53441c3fac9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a632a7f61fc611e0",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a65a6f1f6d217ef9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a69fee3502012cba",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a6f7ca91892d7d2c",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a79a35e14e9519ff",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "a7faf7ebe7c1b794",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "a7fbd9d58f60b3fb",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "aad0dea567a2345a",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "ab788dda5adfaa20",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "aba8285a8d7ae38c",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "ac467a07e598bec7",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "ac929ac122a73c96",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "aca62a50b87df56e",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "ad02d28cf4de1436",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "ad06fe319d222ddc",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "ad5ca28b2f05fa92",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "adde4a8153bdef17",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "aeb9d23449f13949",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "aef5268f22f2b318",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "af6073bf7097727e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "af7699865264f360",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "b0cbed5defc6a92b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "b1311ffb70ea9b11",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "b16f7cf4b523524d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "b19401d0112aab6f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "b1d6d00c7acbe0e3",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "b248db902dddf4a0",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "b62884a0d632843d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "b981e7e7bb7bf694",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "b9f821f430f3182a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "b9ffd6f0e9dfe672",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "ba5e39ac7923ad78",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "ba6d34cfcccb8adf",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "bb343e02edf838a8",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "bc43de239b0b10b9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "bc5511d106752c47",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "bd02c4876640d105",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "bd4afad42a2413f0",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "bd65b2a8ea874c1b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "be23059dd7605786",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "bf78d45115de8740",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "bf87c97efe953d5b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c0767fd026af25ba",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c0f3c9a7dd2276f2",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c0f423c4692cf81f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c116b99805532bb4",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c1ccc89f6e96791b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c1f7586984e6a437",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c2036220c5a9c577",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c2b8bdde132ad2ac",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c2b9d168defac63c",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c36c1c58d30e59d9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c5312c5996667571",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c5d96b180ca651a8",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c5f7b0287c2cfd57",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c63501ac8efeb485",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c642b7370caaf47f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c6a1f431458f662a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c6e328b62e888f99",
+      "sources": [
+        "eco:eco_js"
+      ]
+    },
+    {
+      "id": "c745e17cab1672b0",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c7922836d8414a48",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c7c64ff3093e09b4",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c85ff924da7f7fc1",
+      "sources": [
+        "eco:eco_js"
+      ]
+    },
+    {
+      "id": "c9343fc1148f866d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c9d415eb50f393a2",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "c9fa5396a3ae24c3",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "ca29d76f144ec555",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "ca30ed688ea30ce3",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "cb3509a5477a3b89",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "cb45518afa23241a",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "cb925df0ca586da5",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "cb9fcb1a1671b52d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "cba457833cc53749",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "cd450c39662a880c",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "cd9125be9a686dc4",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "cd9b35322131ff6b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "cedcbb97777b345a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "cfba339a0a5e41c3",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d07bfaad23916ee4",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "d091f80eea0bab7f",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "d0bdb784928bbd5b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d2042c21c8b54d36",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "d2675c753add4fb5",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d29405a4392c20cc",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d43a4295f261fafd",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d504469e78838ab2",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d50b093eca9248be",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d525a5ae1faaccc7",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d53b3b8c9289ec93",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d5825e79d77c728d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d6097c2b93f37981",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "d6c87977ee0cda07",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d72c2c5ea16d7d35",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d762dbf7dac02d43",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d82930b9510e3503",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d854f4ce62ed276b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "d9028e976d4bdc08",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "da65d8efdf33a689",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "da6a623c26781a01",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "da719111ac56d8fd",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "da75058ed3232935",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "daa9e8d45c79e5a4",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "dae35c420134edd7",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "db1920bf78299a0a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "dbc6e6480cf8c23a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "dbf073932ff16e58",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "dc63919d8f474600",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "dce62970b4a3c25d",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "dd66ec712813b808",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "ddadaa967ea1ae2e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "dfde4f22c16d51ca",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e165aeb0d3c93dc9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e191408bbc21463b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e2241126efb35722",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e291302d46137b12",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e34ba099a210a1a9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e3c64ae8de3514d5",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e415ff6325ca2532",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e548c524559f4d8e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e6a53bdb1b5365df",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e7b905c0426f81bd",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e7c6c767cc66da50",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e7e6debeae7b3fec",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e7eee832c09dce75",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e8e7b893d4f866ee",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "e94700b28f094e72",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "ea107f7f939790d3",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "eadd8e605f1be2a3",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "eb4ffea07d07bb1b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "ec42ca4c5a1a6bfb",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "ed5d7c87c4e7846a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "ef072adeae35ea87",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "f0ca345f4348649f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "f14040b69619edcd",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "f2ffd61f57a582a1",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "f45443483127b047",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "f4d35ffe200c11ae",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "f51d90b478c50996",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "f55636a53621d167",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
+      "id": "f5b489bbed6146a9",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "f642bf66e8ee205f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "f80baf74bd39c6af",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "f82b3fcc1e8d5ab3",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "f8f0801940404c78",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "f900e29f004e807c",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "f938482ee9a2023b",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "f94fa26c1d1acf7e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "f9d251b0cb3df349",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "fa45cc2260545e5f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "fa97f5174d7843fd",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "fbc2302d78ed6b42",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "fc0e0ef508beef14",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "fc5dc8c213943b9a",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "fc87690c1015316f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "fcb1385d8d9d4b9f",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "fd3baa9adab9a228",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "fd9a138316ff2a7e",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    },
+    {
+      "id": "fe13a2a0d7228cb2",
+      "sources": [
+        "lichess:eco_tsv",
+        "eco:eco_tsv"
+      ]
+    }
+  ]
+}

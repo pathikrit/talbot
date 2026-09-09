@@ -45,3 +45,18 @@ Full license and upstream third-party notices: ./licenses/EMSCRIPTEN-LICENSE.txt
 Build tools (not application runtime dependencies): Vite (MIT), TypeScript
 (Apache-2.0), Vitest (MIT), and Playwright (Apache-2.0). Exact versions and
 integrity hashes are recorded in package-lock.json in the source archive.
+
+Bundled opening repertoire, compiled and filtered by Talbot from:
+- Lichess chess-openings (CC0-1.0)
+  https://github.com/lichess-org/chess-openings
+  Revision: 4b8622759e7ae6f93f011cc6c83a3823401ab45e
+  License: ./licenses/OPENINGS-LICHESS-CC0.txt
+- JeffML/eco.json (MIT; copyright (c) 2017 Ömür Yanıkoğlu)
+  https://github.com/JeffML/eco.json
+  Revision: 36cfd9227f553dec1d39ee20fa0775eea8f8e165
+  License: ./licenses/OPENINGS-ECO-MIT.txt
+Only original eco_js and CC0 eco_tsv records from eco.json are used; its imports
+from other sources with separate terms are excluded. No upstream evaluations
+or annotations are included. Source snapshots, hashes, per-line attribution,
+family/side rules and the compiler are in book/ and scripts/compile-book.mjs
+inside the corresponding-source archive.

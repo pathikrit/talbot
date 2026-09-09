@@ -10,6 +10,8 @@
     "build": "node scripts/prepare-licenses.mjs && tsc --noEmit && vite build && node scripts/package-source.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
+    "book:compile": "node scripts/compile-book.mjs",
+    "book:check": "node scripts/compile-book.mjs --check",
     "test:engine": "node scripts/test-engine.mjs",
     "test:browser": "playwright test",
     "test:dev": "node scripts/test-dev.mjs",
