@@ -6,7 +6,11 @@ Technical documentation belongs in this file.
 - Preserve the minimal UI: talbot header, New game / Swap sides, wooden board,
   left-hand evaluation bar and capture strip, Undo / Redo.
   No marketing copy, status cards, footer, or keyboard-entry form.
-- Keep Undo/Redo text labels. Left/Right arrow keys trigger the same buttons;
+- Use Font Awesome Free Solid icons for mute, swap, undo and redo, with hover titles
+  Mute/UnMute, Swap Sides, Undo Move, Redo Move and accessible button names.
+  Sharp Duotone and angles-up-down are not in the free pack; use Classic Solid
+  up-down for swapping. Bundle selected SVG paths, not a CDN kit or full font.
+  Left/Right arrow keys trigger the same buttons;
   ignore modified keys, editable fields, and the promotion dialog.
 - Black captured pieces disappear on charcoal. Use a muted warm-taupe capture tray.
   Show every capture individually, no count badges; each gets half a board square
@@ -19,6 +23,9 @@ Technical documentation belongs in this file.
 - Guard Chessground updates by FEN, human color, and move permission; analysis
   updates must not interrupt dragging. Invalidate the guard on promotion cancel
   or invalid optimistic moves.
+- ResizeObserver must call board.redrawAll after board size changes. Mobile
+  WebKit can otherwise retain old Chessground pixel dimensions after reflow,
+  overflowing narrow viewports even when the outer board element fits.
 - Chessground move callbacks are asynchronous. Tests should wait for thinking
   status or a changed FEN before recording the position after a click.
 - Vite caches dependencies in .cache/vite. Running npm ci with a live Vite
@@ -264,8 +271,12 @@ the same Talbot variant on both targets, not unmodified upstream strength.
 The header's version link embeds the build-time Git HEAD SHA (GITHUB_SHA fallback
 for builds without Git metadata). It links directly to that GitHub commit; local
 uncommitted edits are not represented by the SHA. Restart dev after changing HEAD.
-The move-list toolbar has no visible heading and holds five controls in order: New game/Resign, Offer/Accept draw,
-Swap sides, Undo, Redo. New game becomes Resign after a
+The move-list toolbar has no visible heading and holds five controls in order:
+New game/Resign, Offer/Accept draw, Swap sides, Undo, Redo.
+The move panel is capped at 240px. At <=800px it stacks centered below the fluid
+board and messages; larger viewports keep it beside the board. Check 320–1280px
+widths for overflow, square aspect ratio and the five-button single-row toolbar.
+New game becomes Resign after a
 move or while the engine starts as White. Resigning records the current human
 color, cancels searches and buffered replies, and locks play; swapping does not
 change the result. Undo/redo navigation clears resignation to allow exploration.

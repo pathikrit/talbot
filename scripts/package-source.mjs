@@ -11,7 +11,7 @@ for (const path of [
   'public/licenses', 'LICENSE', 'README.md', 'AGENTS.md', 'Makefile', 'package.json', 'package-lock.json',
   'index.html', 'settings.json', 'tsconfig.json', 'vite.config.ts', 'vitest.config.ts', 'playwright.config.ts', '.gitignore',
 ]) cpSync(path, `${target}/${path}`, { recursive: true });
-for (const pkg of ['@lichess-org/chessground', 'chess.js']) {
+for (const pkg of ['@lichess-org/chessground', 'chess.js', '@fortawesome/free-solid-svg-icons', '@fortawesome/fontawesome-common-types']) {
   cpSync(`node_modules/${pkg}`, `${target}/third-party/${pkg}`, { recursive: true });
 }
 cpSync('vendor/engine/src', `${target}/vendor/engine/src`, { recursive: true });

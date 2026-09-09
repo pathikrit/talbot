@@ -39,6 +39,7 @@ test('plays move sounds after interaction and stays silent when muted or navigat
   await expect(page.locator('html')).toHaveAttribute('data-sound-count', '2');
   await page.getByRole('button', { name: 'Move sounds', exact: true }).click();
   await expect(page.locator('#sound')).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('#sound')).toHaveAttribute('title', 'UnMute');
   await page.locator('#undo').click();
   await move(page, 'd2', 'd4');
   await expect(page.getByRole('status')).toHaveText('Your move');
@@ -186,6 +187,29 @@ test('has no horizontal overflow at the project viewport', async ({ page }) => {
   expect(Math.abs(bounds.width - bounds.height)).toBeLessThan(1);
 });
 
+test('keeps the board fluid and stacks the compact move panel on smaller screens', async ({ page }) => {
+  await ready(page);
+  for (const width of [320, 390, 600, 768, 820, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    // Mobile WebKit updates its layout viewport asynchronously after rotation/resize.
+    await expect.poll(() => page.evaluate(() => ({ inner: innerWidth, scroll: document.documentElement.scrollWidth })))
+      .toEqual({ inner: width, scroll: width });
+    const board = (await page.locator('#board').boundingBox())!;
+    const panel = (await page.locator('.moves-panel').boundingBox())!;
+    const messages = (await page.locator('.board-messages').boundingBox())!;
+    expect(Math.abs(board.width - board.height)).toBeLessThan(1);
+    expect(panel.width).toBeLessThanOrEqual(240);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    if (width <= 800) {
+      expect(panel.y).toBeGreaterThan(messages.y + messages.height);
+      expect(Math.abs(panel.x + panel.width / 2 - width / 2)).toBeLessThan(1);
+    } else expect(panel.x).toBeGreaterThan(board.x + board.width);
+    const controls = await page.locator('.history-controls button').all();
+    const top = (await controls[0].boundingBox())!.y;
+    for (const control of controls) expect((await control.boundingBox())!.y).toBe(top);
+  }
+});
+
 test('offers underpromotion and restores the board when promotion is cancelled', async ({ page }) => {
   // Deterministic opponent for this UI-only scenario. Engine legality and search
   // are tested separately against real WASM; no production test hooks are used.
@@ -250,9 +274,10 @@ test('shows only the compact game interface', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Undo', exact: true })).toBeVisible();
   for (const name of ['Undo', 'Redo']) {
     const button = page.getByRole('button', { name, exact: true });
-    await expect(button).toHaveText(name);
+    await expect(button).toHaveText('');
+    await expect(button.locator('svg')).toBeVisible();
     await expect(button).toHaveAttribute('aria-keyshortcuts', name === 'Undo' ? 'ArrowLeft' : 'ArrowRight');
-    await expect(button).toHaveAttribute('title', /.+/);
+    await expect(button).toHaveAttribute('title', `${name} Move`);
   }
   await expect(page.getByRole('meter')).toBeVisible();
   await expect(page.locator('#eval-score')).not.toHaveText('—');
@@ -262,7 +287,10 @@ test('shows only the compact game interface', async ({ page }) => {
   const captures = (await page.locator('.captures').boundingBox())!;
   expect(captures.x).toBeGreaterThan(bar.x + bar.width);
   expect(captures.x + captures.width).toBeLessThan(board.x);
-  await expect(page.locator('.history-controls button')).toHaveText(['New game', 'Offer draw', 'Swap sides', 'Undo', 'Redo']);
+  await expect(page.locator('.history-controls button')).toHaveText(['New game', 'Offer draw', '', '', '']);
+  await expect(page.locator('#swap')).toHaveAttribute('title', 'Swap Sides');
+  await expect(page.locator('#sound')).toHaveAttribute('title', 'Mute');
+  await expect(page.locator('.history-controls svg')).toHaveCount(3);
   await expect(page.locator('#draw')).toBeDisabled();
   await expect(page.locator('#resume')).toHaveCount(0);
   await expect(page.locator('#version')).toHaveText(/^[a-f0-9]{7}$/);
@@ -274,4 +302,8 @@ test('shows only the compact game interface', async ({ page }) => {
   await expect(page.locator('footer, .intro, .status-card, .player-row, details, #move-form')).toHaveCount(0);
   const box = await page.locator('#history').boundingBox();
   expect(box!.height).toBeGreaterThan(150);
+  expect(box!.width).toBeLessThanOrEqual(240);
+  const controls = await page.locator('.history-controls button').all();
+  const top = (await controls[0].boundingBox())!.y;
+  for (const control of controls) expect((await control.boundingBox())!.y).toBe(top);
 });

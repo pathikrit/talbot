@@ -5,6 +5,7 @@ import { Controller } from './controller';
 import { colorName } from './game';
 import { evaluationBar } from './evaluation';
 import { MoveSounds, soundForMove } from './sound';
+import { icons } from './icons';
 import type { EngineResponse } from './engine/protocol';
 import '@lichess-org/chessground/assets/chessground.base.css';
 import '@lichess-org/chessground/assets/chessground.cburnett.css';
@@ -14,7 +15,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <header class="header">
     <h1>talbot</h1>
     <div class="header-tools">
-    <button id="sound" aria-label="Move sounds" aria-pressed="true" title="Mute move sounds">Sound on</button>
+    <button id="sound" class="icon-button" aria-label="Move sounds" aria-pressed="true" title="Mute">${icons.mute}</button>
     <a id="version" class="version" href="https://github.com/pathikrit/talbot/commit/${__GIT_SHA__}" target="_blank" rel="noopener noreferrer" aria-label="View running commit ${__GIT_SHA__.slice(0, 7)}" ${__GIT_SHA__ ? '' : 'hidden'}>${__GIT_SHA__.slice(0, 7)}</a>
     </div>
   </header>
@@ -43,9 +44,9 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         <nav class="history-controls" aria-label="Game controls">
           <button id="new-game">New game</button>
           <button id="draw">Offer draw</button>
-          <button id="swap">Swap sides</button>
-          <button id="undo" aria-keyshortcuts="ArrowLeft" title="Undo your move and the reply (←)">Undo</button>
-          <button id="redo" aria-keyshortcuts="ArrowRight" title="Replay the recorded turn (→)">Redo</button>
+          <button id="swap" class="icon-button" aria-label="Swap sides" title="Swap Sides">${icons.swap}</button>
+          <button id="undo" class="icon-button" aria-label="Undo" aria-keyshortcuts="ArrowLeft" title="Undo Move">${icons.undo}</button>
+          <button id="redo" class="icon-button" aria-label="Redo" aria-keyshortcuts="ArrowRight" title="Redo Move">${icons.redo}</button>
         </nav>
       </div>
       <div id="history" class="history"></div>
@@ -65,9 +66,9 @@ for (const event of ['pointerdown', 'pointerup', 'keydown']) {
 }
 element('sound').addEventListener('click', () => {
   sounds.toggle();
-  element('sound').textContent = sounds.enabled ? 'Sound on' : 'Sound off';
+  element('sound').innerHTML = sounds.enabled ? icons.mute : icons.unmute;
   element('sound').setAttribute('aria-pressed', String(sounds.enabled));
-  element('sound').title = sounds.enabled ? 'Mute move sounds' : 'Enable move sounds';
+  element('sound').title = sounds.enabled ? 'Mute' : 'UnMute';
 });
 const game = controller.game;
 let renderedHistory = '';
@@ -84,6 +85,9 @@ const board = Chessground(element('board'), {
 
 new ResizeObserver(([entry]) => {
   element('board').closest<HTMLElement>('.board-layout')!.style.setProperty('--board-size', `${entry.contentRect.width}px`);
+  // Chessground caches pixel dimensions; mobile viewport changes do not always
+  // trigger its window resize handler after CSS has finished reflowing.
+  board.redrawAll();
 }).observe(element('board'));
 
 function onMove(from: Key, to: Key): void {
@@ -128,7 +132,6 @@ function render(): void {
   element('board').dataset.mode = controller.mode;
   element('board').dataset.depth = String(controller.analysis?.depth ?? 0);
   element('board').setAttribute('aria-busy', String(!controller.ready || controller.mode === 'thinking'));
-  element('swap').title = `Playing ${colorName(game.human)} — switch sides`;
   const ending = game.ending();
   let evaluation = evaluationBar(controller.evaluation);
   if (game.resigned) evaluation = game.resigned === 'b'

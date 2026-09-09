@@ -1,6 +1,12 @@
 TALBOT 0.1.0
 ===========
 
+Font Awesome Free 7.3.1 by Fonticons, Inc. https://fontawesome.com
+Unmodified Classic Solid icons: volume-xmark, volume-high, up-down, backward, forward.
+Icons licensed CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+Code licensed MIT. Full package notice: ./licenses/FONT-AWESOME-LICENSE.txt
+https://fontawesome.com/license/free
+
 Chess.com default sound recordings, mirrored by Orivoir:
 https://github.com/Orivoir/scraping-sound-effects-chess.com
 Revision: f0335e07b3c7c1e82f19e65a38ce2844849c969d
