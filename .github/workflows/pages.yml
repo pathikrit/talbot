@@ -31,6 +31,15 @@ jobs:
       - run: make bootstrap
       - run: make test
       - run: make gh-page
+      - name: Disable unused Chrome apt repository
+        # Playwright downloads its own browsers. A stale Google apt mirror must
+        # not block installation of browser libraries from Ubuntu repositories.
+        run: |
+          for source in /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+            if [ -f "$source" ] && grep -q 'dl.google.com/linux/chrome' "$source"; then
+              sudo mv "$source" "$source.disabled"
+            fi
+          done
       - run: npx playwright install --with-deps chromium firefox webkit
       - run: npm run test:browser
       - uses: actions/upload-artifact@v4

@@ -41,6 +41,9 @@ Technical documentation belongs in this file.
 - Engine build scripts require Bash: Emscripten's environment script cannot
   locate its SDK when sourced through Ubuntu's dash (/bin/sh). Keep Make's
   explicit bash invocation as well as the build script's Bash shebang.
+- CI disables the hosted runner's unused Google Chrome apt repository before
+  Playwright dependency installation: its stale mirror caused repeated hash
+  mismatches. Playwright supplies its own browsers; retain apt verification.
 
 # Talbot
 
