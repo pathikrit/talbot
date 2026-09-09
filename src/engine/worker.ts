@@ -1,5 +1,6 @@
 import { Chess } from 'chess.js';
 import { now, parseInfo } from './protocol';
+import { CandidateSet, chooseSacrifice, SELECTOR_RESERVE_MS } from './sacrifice';
 import type { EngineRequest, EngineResponse, SearchRequest } from './protocol';
 
 interface PatriciaModule {
@@ -13,6 +14,8 @@ let resetPending = false;
 let draining = false;
 let initializing = false;
 let failed = false;
+let candidates: CandidateSet | undefined;
+let bestmove: string | undefined;
 
 function stop(): void { engine?.ccall('talbot_stop', null, [], []); }
 function fail(error: unknown): void {
@@ -39,14 +42,24 @@ async function drain(): Promise<void> {
       active = job;
       const position = new Chess(job.position.fen);
       for (const move of job.position.moves) position.move(move);
+      candidates = new CandidateSet(Math.min(job.multipv ?? 1, position.moves().length));
+      bestmove = undefined;
       const accepted = engine.ccall('talbot_position', 'number', ['string', 'string'],
         [job.position.fen, job.position.moves.join(' ')]);
       if (accepted !== 1) throw new Error('Patricia rejected the move history.');
-      const remaining = job.deadline === undefined ? -1 : Math.max(1, Math.floor(job.deadline - now()));
+      const remaining = job.deadline === undefined ? -1
+        : Math.max(1, Math.floor(job.deadline - now() - SELECTOR_RESERVE_MS));
       const timer = job.deadline === undefined ? undefined : setTimeout(stop, remaining);
       try {
         await engine.ccall('talbot_search', null, ['number', 'number', 'number'],
           [remaining, 0, job.multipv ?? 1], { async: true });
+        if (bestmove && active === job) {
+          const selected = job.deadline === undefined ? undefined : chooseSacrifice(
+            position.fen(), candidates, bestmove,
+            performance.now() + Math.max(0, Math.min(80, job.deadline - now() - 5)),
+          );
+          send({ type: 'bestmove', id: job.id, move: selected?.pv[0] ?? bestmove, selected });
+        }
       } finally { clearTimeout(timer); active = undefined; }
     }
   } catch (error) { fail(error); }
@@ -66,9 +79,12 @@ onmessage = (event: MessageEvent<EngineRequest>) => {
         print: (line: string) => {
           if (!active) return;
           const analysis = parseInfo(line);
-          if (analysis) send({ type: 'info', id: active.id, analysis });
+          if (analysis) {
+            candidates?.add(analysis);
+            send({ type: 'info', id: active.id, analysis });
+          }
           const move = line.match(/^bestmove (\S+)/)?.[1];
-          if (move) send({ type: 'bestmove', id: active.id, move });
+          if (move) bestmove = move;
         },
         printErr: (line: string) => console.error('[Patricia]', line),
       });
@@ -78,10 +94,12 @@ onmessage = (event: MessageEvent<EngineRequest>) => {
     }).catch(fail);
   } else if (message.type === 'search') {
     pending = message;
+    active = undefined;
     stop();
     void drain();
   } else {
     pending = undefined;
+    active = undefined;
     if (message.type === 'reset') resetPending = true;
     stop();
     void drain();

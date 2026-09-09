@@ -108,7 +108,7 @@ implemented.
 
 Patricia has **no upstream aggression slider**. Its style is built into its
 evaluation and networks. Talbot uses full-strength search (`Skill_Level=21`,
-one thread, 32 MB hash, MultiPV 1), with an **experimental modification**:
+one thread, 32 MB hash, MultiPV 20 by default), with an **experimental modification**:
 retain the Feanor sacrifice network for non-endgame search roots instead of
 switching networks after depth six. Below Patricia's original material threshold
 it still uses Finarfin, the endgame network. All three upstream networks are
@@ -116,14 +116,60 @@ embedded and their hashes are recorded in `public/engine/provenance.json`.
 
 This is not an upstream “maximum aggression” setting, a measured strength claim,
 or a guarantee that every game contains a sacrifice. No deliberately weakened
-human-skill mode, random sacrifices, book, Stockfish guardrail, or custom move
-selector is enabled. Gambit preferences are deferred to a later version.
+human-skill mode, random sacrifices, book, or Stockfish guardrail is enabled.
+Gambit preferences are deferred to a later version.
 
 Patricia supports MultiPV 1–255, capped at the number of legal root moves.
 The typed worker interface accepts `multipv` and returns indexed analysis with
-depth, cp/mate score, nodes, NPS, and PV. Bound-only output is filtered out. A
-future selector must collect a complete common-depth candidate set; the stream
-does not imply that all candidates in flight have been searched equally deeply.
+depth, cp/mate score, nodes, NPS, and PV. Bound-only output is filtered out.
+
+### Sacrifice selection
+
+`src/engine/sacrifice.ts` chooses the largest verified net material offer within
+50cp of the best candidate by default, breaking size ties by better evaluation
+and then MultiPV order. Search requests 20 distinct root moves, capped
+at the legal move count, during both timed play and pondering. Only the latest
+complete common-depth batch (depth >= 4) is comparable. Partial newer iterations
+do not replace it. Mate scores disable selection; an unavailable fallback move,
+incomplete batch, or no qualifying offer leaves Patricia's best move unchanged.
+
+Root `settings.json` has one setting: `maxSacrificeLossCp`, the allowed evaluation
+loss (nonnegative integer). MultiPV is internal (`SEARCH_MULTIPV` in src/settings.ts),
+not another user-facing style parameter. The worker imports validated build-time
+settings. Refresh after
+editing in dev; rebuild/redeploy for GitHub Pages. No runtime configuration fetch
+or UI controls are added. Keep settings.json in the source-package allowlist.
+Wider MultiPV reduces search depth within the unchanged one-second budget.
+
+Acceptance is checked separately from the main PV: **declined offers count**.
+Require a new immediate legal capture that leaves Talbot at least a pawn worse
+in net material relative to the root, accounting for its own initial capture.
+This includes rook-for-knight and queen-for-rook sacrifices, not equal trades.
+An unrelated move leaving an already attacked piece in place does not qualify.
+The supplied acceptance PV must not regain the investment. A bounded material
+minimax follows captures, promotions, checks and all check evasions to reject
+immediate recovery even when the main PV declines the offer.
+Rank the material still given up after recovery, capped at the immediate net
+investment; e.g. rook for knight is 180 material points, not 500. Inspect all
+acceptances and eligible candidates until the probe budget expires rather than
+returning the first sacrifice. Keep the largest verified offer if time runs out.
+Unresolved acceptance lines are skipped and do not erase already verified ones.
+
+This is a conservative **heuristic**, not proof of a true long-term sacrifice:
+quiet tactics outside the PV and deferred offers are not fully resolved. The
+material probe does not establish positional soundness; Patricia's root score
+estimates that. A six-ply unresolved tactical frontier, mate, invalid PV or
+exhausted probe budget makes that offer unclassified. Do not describe the cp
+budget as a guaranteed strength or safety bound.
+
+Reserve 100ms of the existing one-second wall-clock deadline; probing uses at
+most 80ms / 1500 nodes across candidates, with time checks between nodes. Browser
+scheduling or a costly individual node may overrun slightly. Probing runs only
+in the worker after the timed search unwinds. Pondering retains MultiPV/TT work,
+but its speculative candidates are never reused as actual-root evidence.
+Chosen moves return their own analysis/PV so evaluation and the next ponder
+prediction match the move actually played. Cancelled jobs must not select or
+emit a result. The controller still holds early replies until the deadline.
 
 ## Browser engine architecture
 
@@ -175,4 +221,3 @@ GPL-compatible license option. See [notices](public/THIRD-PARTY-NOTICES.txt).
 Production builds include full notices/licenses and a corresponding-source
 archive (application, adapter, build instructions, Patricia/networks, and the
 board/rules dependency sources) alongside the app. No warranty is provided.
-

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Controller } from '../../src/controller';
 import { Game } from '../../src/game';
+import { SEARCH_MULTIPV } from '../../src/settings';
 import { parseInfo } from '../../src/engine/protocol';
 import type { EngineRequest, SearchRequest } from '../../src/engine/protocol';
 
@@ -16,6 +17,23 @@ beforeEach(() => {
 afterEach(() => { controller.dispose(); vi.useRealTimers(); });
 
 describe('search lifecycle', () => {
+  it('uses internal search breadth during both pondering and timed play', () => {
+    expect(search().multipv).toBe(SEARCH_MULTIPV);
+    controller.play('e2e4');
+    expect(search().multipv).toBe(SEARCH_MULTIPV);
+  });
+  it('uses the chosen sacrifice score and PV for evaluation and prediction', () => {
+    controller.play('e2e4');
+    const selected = parseInfo('info multipv 2 depth 7 score cp -25 pv c7c5 g1f3 d7d6')!;
+    controller.receive({ type: 'info', id: search().id, analysis: parseInfo('info depth 7 score cp 10 pv e7e5 f2f4')! });
+    controller.receive({ type: 'bestmove', id: search().id, move: 'c7c5', selected });
+    vi.advanceTimersByTime(999);
+    expect(controller.game.cursor).toBe(1);
+    vi.advanceTimersByTime(1);
+    expect(controller.game.moves).toEqual(['e2e4', 'c7c5']);
+    expect(controller.evaluation).toEqual({ kind: 'cp', value: 25 });
+    expect(search().position.moves).toEqual(['e2e4', 'c7c5', 'g1f3']);
+  });
   it('does not replace the current evaluation with a speculative ponder score', () => {
     controller.play('e2e4');
     controller.receive({ type: 'info', id: search().id, analysis: parseInfo('info depth 7 score cp 50 nodes 100 time 100 pv e7e5 g1f3')! });

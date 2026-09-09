@@ -9,7 +9,7 @@ mkdirSync(target);
 for (const path of [
   'src', 'engine', 'scripts', 'tests', '.github', 'public/THIRD-PARTY-NOTICES.txt',
   'public/licenses', 'LICENSE', 'README.md', 'AGENTS.md', 'Makefile', 'package.json', 'package-lock.json',
-  'index.html', 'tsconfig.json', 'vite.config.ts', 'vitest.config.ts', 'playwright.config.ts', '.gitignore',
+  'index.html', 'settings.json', 'tsconfig.json', 'vite.config.ts', 'vitest.config.ts', 'playwright.config.ts', '.gitignore',
 ]) cpSync(path, `${target}/${path}`, { recursive: true });
 for (const pkg of ['@lichess-org/chessground', 'chess.js']) {
   cpSync(`node_modules/${pkg}`, `${target}/third-party/${pkg}`, { recursive: true });

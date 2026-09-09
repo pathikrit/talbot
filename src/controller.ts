@@ -2,6 +2,7 @@ import { Chess } from 'chess.js';
 import { Game } from './game';
 import { now } from './engine/protocol';
 import { whiteEvaluation } from './evaluation';
+import { SEARCH_MULTIPV } from './settings';
 import type { Evaluation } from './evaluation';
 import type { Analysis, EngineRequest, EngineResponse } from './engine/protocol';
 
@@ -43,11 +44,16 @@ export class Controller {
       this.changed();
     } else if (this.mode === 'thinking') {
       const revision = this.revision;
-      const pv = this.analysis?.pv;
+      const selected = message.selected;
+      const pv = selected?.pv ?? this.analysis?.pv;
       clearTimeout(this.moveTimer);
       this.moveTimer = setTimeout(() => {
         if (revision !== this.revision || this.game.humanTurn || !this.visible || this.error) return;
         try {
+          if (selected) {
+            this.analysis = selected;
+            this.evaluation = whiteEvaluation(selected.score, this.game.chess.turn());
+          }
           this.game.play(message.move);
           this.prediction = pv?.[0] === message.move ? pv[1] : undefined;
           this.sync(true);
@@ -92,7 +98,7 @@ export class Controller {
         type: 'search', id: this.revision,
         position: { fen: game.initialFen, moves },
         deadline: game.humanTurn ? undefined : this.deadline,
-        multipv: 1,
+        multipv: SEARCH_MULTIPV,
       });
       if (!game.humanTurn) {
         // Do not leave the user waiting indefinitely after a worker crash/hang.

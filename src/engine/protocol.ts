@@ -25,7 +25,7 @@ export interface Analysis {
 export type EngineResponse =
   | { type: 'ready' }
   | { type: 'info'; id: number; analysis: Analysis }
-  | { type: 'bestmove'; id: number; move: string }
+  | { type: 'bestmove'; id: number; move: string; selected?: Analysis }
   | { type: 'error'; message: string };
 
 export function parseInfo(line: string): Analysis | undefined {
