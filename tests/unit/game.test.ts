@@ -49,6 +49,43 @@ describe('game history', () => {
 });
 
 describe('legal chess', () => {
+  it('counts material from the board, including promotions, history and side swaps', () => {
+    const game = new Game();
+    game.play('e2e4'); game.play('d7d5'); game.play('e4d5');
+    expect(game.materialDifference).toBe(1);
+    game.swap(); expect(game.materialDifference).toBe(1);
+    game.seek(2); expect(game.materialDifference).toBe(0);
+    game.seek(3); expect(game.materialDifference).toBe(1);
+    game.reset(); expect(game.materialDifference).toBe(0);
+    const promotion = new Game('7k/P7/8/8/8/8/8/7K w - - 0 1');
+    promotion.play('a7a8q'); expect(promotion.materialDifference).toBe(9);
+    promotion.undo(); expect(promotion.materialDifference).toBe(1);
+    const pieces = new Game('7k/8/8/8/8/8/qrbnp3/7K w - - 0 1');
+    expect(pieces.materialDifference).toBe(-21);
+  });
+  it('ends at 100 reversible plies, but resets the clock for a pawn move', () => {
+    const game = new Game('7k/8/5K2/8/8/8/P7/R7 w - - 99 50');
+    game.play('a1b1');
+    expect(game.ending()).toBe('Draw by the fifty-move rule');
+    game.undo();
+    expect(game.over).toBe(false);
+    game.play('a2a3');
+    expect(game.over).toBe(false);
+    expect(game.chess.fen().split(' ')[4]).toBe('0');
+  });
+  it('tracks active games and prevents moves after resignation', () => {
+    const game = new Game();
+    expect(game.active).toBe(false);
+    game.play('e2e4');
+    expect(game.active).toBe(true);
+    game.resign();
+    expect(game.active).toBe(false);
+    expect(() => game.play('e7e5')).toThrow('The game has ended.');
+    game.reset();
+    expect(game.over).toBe(false);
+    game.swap();
+    expect(game.active).toBe(true);
+  });
   it('rejects illegal moves without modifying history', () => {
     const game = new Game();
     expect(() => game.play('e2e5')).toThrow();

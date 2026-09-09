@@ -17,6 +17,171 @@ beforeEach(() => {
 afterEach(() => { controller.dispose(); vi.useRealTimers(); });
 
 describe('search lifecycle', () => {
+  it('clears pending offers when sides or history change and ignores stale evaluations', () => {
+    controller.play('e2e4');
+    controller.offerDraw();
+    const id = search().id;
+    controller.swap();
+    controller.receive({ type: 'info', id, analysis: parseInfo('info depth 8 score cp 0 pv e7e5')! });
+    expect(controller.drawOffer).toBeUndefined();
+    expect(controller.game.over).toBe(false);
+    controller.offerDraw();
+    controller.undo();
+    expect(controller.drawOffer).toBeUndefined();
+  });
+  it('never uses a speculative ponder score to accept a draw', () => {
+    controller.play('e2e4');
+    controller.receive({ type: 'bestmove', id: search().id, move: 'e7e5',
+      selected: parseInfo('info depth 8 score cp 200 pv e7e5 g1f3')! });
+    vi.advanceTimersByTime(1000);
+    controller.receive({ type: 'info', id: search().id, analysis: parseInfo('info depth 12 score cp 0 pv b8c6')! });
+    controller.offerDraw();
+    expect(controller.game.over).toBe(false);
+    expect(controller.drawOffer).toBe('human');
+    expect(search().position.moves).toEqual(['e2e4', 'e7e5']);
+  });
+  it.each(['w', 'b'] as const)('stops when %s is human and White delivers mate', human => {
+    const game = new Game('7k/8/5KQ1/8/8/8/8/8 w - - 0 1');
+    game.human = human;
+    controller.dispose();
+    controller = new Controller({ postMessage: message => requests.push(message) }, () => {}, game);
+    controller.receive({ type: 'ready' });
+    if (human === 'w') controller.play('g6g7');
+    else {
+      controller.receive({ type: 'bestmove', id: search().id, move: 'g6g7' });
+      vi.advanceTimersByTime(1000);
+    }
+    expect(game.ending()).toBe('white wins by checkmate');
+    expect(controller.mode).toBe('idle');
+    controller.swap();
+    expect(game.ending()).toBe('white wins by checkmate');
+    controller.undo();
+    expect(game.over).toBe(false);
+    controller.redo();
+    expect(game.over).toBe(true);
+  });
+  it('rebuilds repetition after undo/redo and stays ended after swapping', () => {
+    const game = new Game();
+    for (let i = 0; i < 2; i++) for (const move of ['g1f3', 'g8f6', 'f3g1', 'f6g8']) game.play(move);
+    controller.dispose();
+    controller = new Controller({ postMessage: message => requests.push(message) }, () => {}, game);
+    controller.receive({ type: 'ready' });
+    expect(controller.mode).toBe('idle');
+    controller.undo(); expect(game.over).toBe(false);
+    controller.redo(); expect(game.ending()).toBe('Draw by repetition');
+    controller.swap(); expect(controller.mode).toBe('idle');
+  });
+  it('accepts an equal-position offer and cancels a buffered reply', () => {
+    controller.play('e2e4');
+    const id = search().id;
+    controller.receive({ type: 'info', id, analysis: parseInfo('info depth 8 score cp 0 pv e7e5')! });
+    controller.receive({ type: 'bestmove', id, move: 'e7e5' });
+    controller.offerDraw();
+    vi.advanceTimersByTime(6000);
+    expect(controller.game.ending()).toBe('Draw by agreement');
+    expect(controller.game.cursor).toBe(1);
+    expect(controller.mode).toBe('idle');
+    controller.swap();
+    expect(controller.game.ending()).toBe('Draw by agreement');
+    controller.undo();
+    expect(controller.game.over).toBe(false);
+    controller.newGame();
+    expect(controller.drawOffer).toBeUndefined();
+  });
+  it('declines when ahead and waits for a sufficiently deep actual-root score', () => {
+    controller.play('e2e4');
+    controller.offerDraw();
+    const id = search().id;
+    controller.receive({ type: 'info', id, analysis: parseInfo('info depth 4 score cp 0 pv e7e5')! });
+    expect(controller.drawOffer).toBe('human');
+    controller.receive({ type: 'info', id, analysis: parseInfo('info depth 8 score cp 150 pv e7e5')! });
+    expect(controller.drawOffer).toBeUndefined();
+    expect(controller.drawNotice).toBe('Talbot declined the draw');
+    expect(controller.game.over).toBe(false);
+  });
+  it('offers a late equal draw, allows decline without ending, and can accept', () => {
+    const game = new Game();
+    for (let ply = 0; ply < 40; ply++) {
+      const candidates = game.chess.moves({ verbose: true });
+      for (const move of candidates) {
+        const cursor = game.cursor;
+        game.play(move.from + move.to + (move.promotion ?? ''));
+        if (!game.over) break;
+        game.seek(cursor);
+      }
+    }
+    game.human = 'b';
+    game.reviewing = false;
+    controller.dispose();
+    controller = new Controller({ postMessage: message => requests.push(message) }, () => {}, game);
+    controller.receive({ type: 'ready' });
+    const move = game.chess.moves({ verbose: true })[0];
+    const uci = move.from + move.to + (move.promotion ?? '');
+    controller.receive({ type: 'bestmove', id: search().id, move: uci,
+      selected: parseInfo(`info depth 8 score cp 0 pv ${uci}`)! });
+    vi.advanceTimersByTime(1000);
+    expect(controller.drawOffer).toBe('engine');
+    controller.declineDraw();
+    expect(controller.drawOffer).toBeUndefined();
+    expect(game.over).toBe(false);
+    controller.drawOffer = 'engine';
+    controller.acceptDraw();
+    expect(game.ending()).toBe('Draw by agreement');
+    expect(controller.mode).toBe('idle');
+  });
+  it.each([
+    ['7k/6Q1/5K2/8/8/8/8/8 b - - 0 1', 'white wins by checkmate'],
+    ['8/8/8/8/8/5k2/6q1/7K w - - 0 1', 'black wins by checkmate'],
+    ['7k/5Q2/5K2/8/8/8/8/8 b - - 0 1', 'Draw by stalemate'],
+    ['7k/8/5K2/8/8/8/8/R7 w - - 100 51', 'Draw by the fifty-move rule'],
+    ['7k/8/5K2/8/8/8/8/8 w - - 0 1', 'Draw by insufficient material'],
+  ])('keeps an ended position idle through swaps: %s', (fen, ending) => {
+    controller.dispose();
+    controller = new Controller({ postMessage: message => requests.push(message) }, () => {}, new Game(fen));
+    controller.receive({ type: 'ready' });
+    const before = requests.filter(message => message.type === 'search').length;
+    controller.swap(); controller.swap();
+    expect(controller.game.ending()).toBe(ending);
+    expect(controller.mode).toBe('idle');
+    expect(requests.filter(message => message.type === 'search')).toHaveLength(before);
+    controller.offerDraw();
+    expect(controller.drawOffer).toBeUndefined();
+  });
+  it('seeks to a clicked move, preserving future history and cancelling replies', () => {
+    controller.play('e2e4');
+    controller.receive({ type: 'bestmove', id: search().id, move: 'e7e5' });
+    vi.advanceTimersByTime(1000);
+    controller.play('g1f3');
+    controller.receive({ type: 'bestmove', id: search().id, move: 'b8c6' });
+    controller.seek(1);
+    vi.advanceTimersByTime(1000);
+    expect(controller.game.moves).toEqual(['e2e4']);
+    expect(controller.game.history).toHaveLength(3);
+    expect(controller.mode).toBe('thinking');
+    controller.seek(2);
+    expect(controller.game.moves).toEqual(['e2e4', 'e7e5']);
+    expect(controller.mode).toBe('pondering');
+  });
+  it('resigns, cancels buffered replies, and permits undo or a fresh game', () => {
+    controller.play('e2e4');
+    const id = search().id;
+    controller.receive({ type: 'bestmove', id, move: 'e7e5' });
+    controller.resign();
+    expect(controller.game.ending()).toBe('black wins by resignation');
+    expect(controller.mode).toBe('idle');
+    controller.receive({ type: 'bestmove', id, move: 'e7e5' });
+    vi.advanceTimersByTime(6000);
+    expect(controller.game.cursor).toBe(1);
+    expect(controller.error).toBe('');
+    controller.swap();
+    expect(controller.game.ending()).toBe('black wins by resignation');
+    expect(controller.mode).toBe('idle');
+    controller.undo();
+    expect(controller.game.over).toBe(false);
+    controller.resign();
+    controller.newGame();
+    expect(controller.game.over).toBe(false);
+  });
   it('records book choices only with committed moves and restores them through undo/redo', () => {
     controller.play('e2e4');
     controller.receive({ type: 'bestmove', id: search().id, move: 'e7e5', opening: 'stafford-line' });
@@ -120,10 +285,12 @@ describe('search lifecycle', () => {
     expect(controller.game.human).toBe('b');
     expect(controller.mode).toBe('pondering');
   });
-  it('replays a pending human move without automatically replacing recorded history', () => {
+  it('automatically resumes a reply after replaying a pending human move', () => {
     controller.play('e2e4'); controller.undo(); controller.redo();
-    expect(controller.mode).toBe('paused');
-    controller.resume(); expect(controller.mode).toBe('thinking');
+    expect(controller.mode).toBe('thinking');
+    controller.receive({ type: 'bestmove', id: search().id, move: 'e7e5' });
+    vi.advanceTimersByTime(1000);
+    expect(controller.game.moves).toEqual(['e2e4', 'e7e5']);
   });
   it('pauses when hidden and restarts safely when visible', () => {
     controller.play('e2e4'); const id = search().id;

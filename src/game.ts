@@ -12,6 +12,8 @@ export class Game {
   history: Move[] = [];
   cursor = 0;
   reviewing = false;
+  resigned?: Color;
+  agreedDraw = false;
 
   constructor(fen = DEFAULT_POSITION) {
     this.initialFen = fen;
@@ -19,7 +21,14 @@ export class Game {
   }
 
   get humanTurn(): boolean { return this.chess.turn() === this.human; }
+  get over(): boolean { return this.agreedDraw || !!this.resigned || this.chess.isGameOver(); }
+  get active(): boolean { return !this.over && (this.cursor > 0 || !this.humanTurn); }
   get moves(): string[] { return this.history.slice(0, this.cursor).map(moveUci); }
+  get materialDifference(): number {
+    const values = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+    return this.chess.board().flat().reduce((total, piece) =>
+      total + (piece ? values[piece.type] * (piece.color === 'w' ? 1 : -1) : 0), 0);
+  }
 
   captures(by: Color): PieceSymbol[] {
     const order = 'qrbnp';
@@ -30,7 +39,7 @@ export class Game {
   }
 
   play(uci: string): Move {
-    if (this.chess.isGameOver()) throw new Error('The game has ended.');
+    if (this.over) throw new Error('The game has ended.');
     if (!/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(uci)) throw new Error('Use a move like e2e4 or e7e8q.');
     const move = this.chess.move({
       from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4],
@@ -42,7 +51,10 @@ export class Game {
     return move;
   }
 
-  private seek(cursor: number): void {
+  seek(cursor: number): void {
+    if (!Number.isInteger(cursor) || cursor < 0 || cursor > this.history.length) return;
+    this.resigned = undefined;
+    this.agreedDraw = false;
     this.chess = new Chess(this.initialFen);
     this.cursor = cursor;
     for (const move of this.history.slice(0, cursor)) this.chess.move(moveUci(move));
@@ -64,8 +76,12 @@ export class Game {
   }
 
   swap(): void { this.human = other(this.human); this.reviewing = false; }
+  resign(): void { if (!this.over) this.resigned = this.human; }
+  agreeDraw(): void { if (!this.over) this.agreedDraw = true; }
 
   reset(): void {
+    this.agreedDraw = false;
+    this.resigned = undefined;
     this.chess = new Chess(this.initialFen);
     this.history = [];
     this.cursor = 0;
@@ -83,6 +99,8 @@ export class Game {
   }
 
   ending(): string | undefined {
+    if (this.agreedDraw) return 'Draw by agreement';
+    if (this.resigned) return `${colorName(other(this.resigned))} wins by resignation`;
     if (this.chess.isCheckmate()) return `${colorName(other(this.chess.turn()))} wins by checkmate`;
     if (this.chess.isStalemate()) return 'Draw by stalemate';
     if (this.chess.isThreefoldRepetition()) return 'Draw by repetition';

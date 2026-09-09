@@ -19,6 +19,9 @@ export class Controller {
   analysis?: Analysis;
   evaluation?: Evaluation;
   revision = 0;
+  drawOffer?: 'human' | 'engine';
+  drawNotice = '';
+  private lastDrawOffer = -20;
   private prediction?: string;
   private speculative = false;
   private deadline = 0;
@@ -41,7 +44,10 @@ export class Controller {
     if (message.type === 'info') {
       if (message.analysis.multipv === 1) {
         this.analysis = message.analysis;
-        if (!this.speculative) this.evaluation = whiteEvaluation(message.analysis.score, this.game.chess.turn());
+        if (!this.speculative) {
+          this.evaluation = whiteEvaluation(message.analysis.score, this.game.chess.turn());
+          if (this.drawOffer === 'human' && message.analysis.depth >= 8) this.resolveDraw();
+        }
       }
       this.changed();
     } else if (this.mode === 'thinking') {
@@ -57,8 +63,17 @@ export class Controller {
             this.evaluation = whiteEvaluation(selected.score, this.game.chess.turn());
           }
           const side = this.game.chess.turn();
+          const assessed = selected ?? this.analysis;
+          const offerDraw = this.game.cursor >= 40 && this.game.cursor - this.lastDrawOffer >= 20
+            && assessed && assessed.depth >= 8 && assessed.score.kind === 'cp' && Math.abs(assessed.score.value) <= 20;
           const plans = { ...this.openings[this.game.cursor], [side]: message.opening ?? null };
           this.game.play(message.move);
+          if (this.drawOffer === 'human') this.drawNotice = 'Talbot declined the draw';
+          this.drawOffer = undefined;
+          if (offerDraw && !this.game.over) {
+            this.drawOffer = 'engine';
+            this.lastDrawOffer = this.game.cursor;
+          }
           this.openings = this.openings.slice(0, this.game.cursor);
           this.openings[this.game.cursor] = plans;
           this.prediction = pv?.[0] === message.move ? pv[1] : undefined;
@@ -84,8 +99,7 @@ export class Controller {
     if (this.error) this.mode = 'error';
     else if (!this.ready) this.mode = 'loading';
     else if (!this.visible) this.mode = 'paused';
-    else if (game.chess.isGameOver()) this.mode = 'idle';
-    else if (game.reviewing && !game.humanTurn) this.mode = 'paused';
+    else if (game.over) this.mode = 'idle';
     else {
       this.mode = game.humanTurn ? 'pondering' : 'thinking';
       const moves = game.moves;
@@ -116,19 +130,45 @@ export class Controller {
   }
 
   play(uci: string): void {
-    if (!this.ready || this.error || !this.visible || !this.game.humanTurn) return;
+    if (!this.ready || this.error || !this.visible || !this.game.humanTurn || this.game.over) return;
     const plans = { ...this.openings[this.game.cursor] };
     this.game.play(uci);
+    this.clearDraw();
     this.openings = this.openings.slice(0, this.game.cursor);
     this.openings[this.game.cursor] = plans;
     this.prediction = undefined;
     this.sync();
   }
-  swap(): void { this.game.swap(); this.prediction = undefined; this.sync(true); }
-  undo(): void { this.game.undo(); this.prediction = undefined; this.sync(); }
-  redo(): void { this.game.redo(); this.prediction = undefined; this.sync(); }
-  resume(): void { this.game.reviewing = false; this.sync(); }
+  private clearDraw(): void { this.drawOffer = undefined; this.drawNotice = ''; }
+  offerDraw(): void {
+    if (!this.ready || this.error || !this.visible || !this.game.active || this.drawOffer) return;
+    this.drawOffer = 'human';
+    this.drawNotice = 'Draw offered';
+    if (!this.speculative && this.analysis && this.analysis.depth >= 8) this.resolveDraw();
+    else { this.prediction = undefined; this.sync(); } // Evaluate the actual root.
+  }
+  private resolveDraw(): void {
+    const score = this.evaluation;
+    if (!score) return;
+    const engineScore = score.value * (this.game.human === 'w' ? -1 : 1);
+    if ((score.kind === 'cp' && engineScore <= 20) || (score.kind === 'mate' && engineScore < 0)) {
+      this.game.agreeDraw(); this.clearDraw(); this.sync(true);
+    } else {
+      this.drawOffer = undefined; this.drawNotice = 'Talbot declined the draw'; this.changed();
+    }
+  }
+  acceptDraw(): void {
+    if (this.drawOffer !== 'engine' || this.game.over) return;
+    this.game.agreeDraw(); this.clearDraw(); this.sync(true);
+  }
+  declineDraw(): void { if (this.drawOffer === 'engine') { this.clearDraw(); this.changed(); } }
+  swap(): void { this.clearDraw(); this.game.swap(); this.prediction = undefined; this.sync(true); }
+  resign(): void { this.clearDraw(); this.game.resign(); this.prediction = undefined; this.sync(true); }
+  undo(): void { this.clearDraw(); this.game.undo(); this.prediction = undefined; this.sync(); }
+  seek(cursor: number): void { this.clearDraw(); this.game.seek(cursor); this.prediction = undefined; this.sync(); }
+  redo(): void { this.clearDraw(); this.game.redo(); this.prediction = undefined; this.sync(); }
   newGame(): void {
+    this.clearDraw(); this.lastDrawOffer = -20;
     this.game.reset();
     this.openings = [{}];
     this.prediction = undefined;

@@ -21,6 +21,38 @@ async function move(page: Page, from: string, to: string): Promise<void> {
 }
 async function fen(page: Page): Promise<string> { return (await page.locator('#board').getAttribute('data-fen'))!; }
 
+test('agrees a draw, preserves the result across swapping, and undoes into play', async ({ page }) => {
+  await page.addInitScript(() => {
+    class DrawOpponent {
+      onmessage?: (event: { data: unknown }) => void;
+      postMessage(message: { type: string; id: number }) {
+        const emit = (data: unknown) => setTimeout(() => this.onmessage?.({ data }), 0);
+        if (message.type === 'init') emit({ type: 'ready' });
+        if (message.type === 'search') emit({ type: 'info', id: message.id, analysis: {
+          depth: 8, multipv: 1, score: { kind: 'cp', value: 0 }, nodes: 100, nps: 100, time: 1, pv: [],
+        } });
+      }
+    }
+    window.Worker = DrawOpponent as unknown as typeof Worker;
+  });
+  await ready(page);
+  await move(page, 'e2', 'e4');
+  await page.getByRole('button', { name: 'Offer draw', exact: true }).click();
+  await expect(page.locator('#result')).toHaveText('Draw by agreement');
+  const resultBounds = (await page.locator('#result').boundingBox())!;
+  const boardBounds = (await page.locator('#board').boundingBox())!;
+  expect(resultBounds.y).toBeGreaterThan(boardBounds.y + boardBounds.height);
+  expect(Math.abs(resultBounds.x + resultBounds.width / 2 - boardBounds.x - boardBounds.width / 2)).toBeLessThan(1);
+  await expect(page.locator('#eval-score')).toHaveText('½–½');
+  await expect(page.locator('#board')).toHaveAttribute('data-mode', 'idle');
+  await expect(page.locator('#draw')).toBeDisabled();
+  await expect(page.locator('#new-game')).toHaveText('New game');
+  await page.locator('#swap').click();
+  await expect(page.locator('#result')).toHaveText('Draw by agreement');
+  await page.locator('#undo').click();
+  await expect(page.locator('#result')).toBeHidden();
+});
+
 test('loads at a repository subpath, plays on the board, replies in one second, and replays a turn', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -35,6 +67,11 @@ test('loads at a repository subpath, plays on the board, replies in one second, 
   expect(elapsed).toBeGreaterThan(800);
   expect(elapsed).toBeLessThan(2000);
   const afterReply = await fen(page);
+  await page.locator('#history button.move').first().click();
+  expect(new Chess(await fen(page)).turn()).toBe('b');
+  await expect(page.locator('#board')).toHaveAttribute('data-mode', 'thinking');
+  await page.locator('#history button.move').nth(1).click();
+  expect(await fen(page)).toBe(afterReply);
   const chess = new Chess(afterReply);
   expect(chess.turn()).toBe('w');
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
@@ -60,6 +97,9 @@ test('switches sides during search and cancels obsolete replies', async ({ page 
   await expect(page.getByRole('status')).toHaveText('Your move');
   await move(page, 'e7', 'e5');
   await expect(page.getByRole('status')).toHaveText('Talbot is thinking');
+  await page.getByRole('button', { name: 'Resign', exact: true }).click();
+  await expect(page.getByRole('status')).toHaveText('White wins by resignation');
+  await expect(page.locator('#board')).toHaveAttribute('data-mode', 'idle');
   await page.getByRole('button', { name: 'New game' }).click();
   // New game retains the chosen side, so Patricia now makes White's first move.
   await expect(page.getByRole('status')).toHaveText('Your move', { timeout: 2500 });
@@ -67,7 +107,7 @@ test('switches sides during search and cancels obsolete replies', async ({ page 
   expect((await fen(page)).split(' ')[5]).toBe('1');
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   expect(await fen(page)).toBe(DEFAULT_POSITION);
-  await expect(page.getByRole('button', { name: 'Continue from here' })).toBeVisible();
+  await expect(page.locator('#board')).toHaveAttribute('data-mode', 'thinking');
   await page.getByRole('button', { name: 'Redo', exact: true }).click();
   await expect(page.getByRole('status')).toHaveText('Your move');
 });
@@ -86,6 +126,9 @@ test('shows an explicit engine loading failure', async ({ page }) => {
   await page.goto('./');
   await expect(page.getByRole('status')).toHaveText('Engine unavailable');
   await expect(page.getByRole('alert')).toBeVisible();
+  const errorBounds = (await page.getByRole('alert').boundingBox())!;
+  const boardBounds = (await page.locator('#board').boundingBox())!;
+  expect(errorBounds.y).toBeGreaterThan(boardBounds.y + boardBounds.height);
   await expect(page.locator('#board')).toHaveAttribute('data-mode', 'error');
 });
 
@@ -149,6 +192,14 @@ test('offers underpromotion and restores the board when promotion is cancelled',
   const before = await fen(page);
   await expect(page.locator('#white-captures piece.black.pawn')).toHaveCount(1);
   await expect(page.locator('#black-captures piece.white.pawn')).toHaveCount(1);
+  await expect(page.locator('#white-captures .capture-slot')).toHaveCount(1);
+  const whitePawn = (await page.locator('#white-captures .capture-slot').boundingBox())!;
+  const blackPawn = (await page.locator('#black-captures .capture-slot').boundingBox())!;
+  expect(whitePawn.y).toBe(blackPawn.y);
+  await expect(page.locator('.capture-count')).toHaveCount(0);
+  const pawnIcon = (await page.locator('#white-captures piece').boundingBox())!;
+  expect(Math.abs(pawnIcon.height - (await page.locator('#board').boundingBox())!.width / 16)).toBeLessThan(1);
+  expect(whitePawn.y - (await page.locator('.captures').boundingBox())!.y).toBeLessThan(10);
   await move(page, 'b7', 'a8');
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
@@ -170,7 +221,8 @@ test('shows only the compact game interface', async ({ page }) => {
   await ready(page);
   await expect(page).toHaveTitle('talbot');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('talbot');
-  await expect(page.getByRole('heading', { level: 2 })).toHaveText('Moves');
+  await expect(page.locator('.moves-panel h2')).toHaveCount(0);
+  await expect(page.locator('#material')).toHaveAttribute('aria-label', 'Material is equal');
   await expect(page.getByRole('button', { name: 'Undo', exact: true })).toBeVisible();
   for (const name of ['Undo', 'Redo']) {
     const button = page.getByRole('button', { name, exact: true });
@@ -184,8 +236,17 @@ test('shows only the compact game interface', async ({ page }) => {
   const board = (await page.locator('#board').boundingBox())!;
   expect(bar.x + bar.width).toBeLessThan(board.x);
   const captures = (await page.locator('.captures').boundingBox())!;
-  const moves = (await page.locator('.moves-header').boundingBox())!;
-  expect(captures.y + captures.height).toBeLessThanOrEqual(moves.y + 1);
+  expect(captures.x).toBeGreaterThan(bar.x + bar.width);
+  expect(captures.x + captures.width).toBeLessThan(board.x);
+  await expect(page.locator('.history-controls button')).toHaveText(['New game', 'Offer draw', 'Swap sides', 'Undo', 'Redo']);
+  await expect(page.locator('#draw')).toBeDisabled();
+  await expect(page.locator('#resume')).toHaveCount(0);
+  await expect(page.locator('#version')).toHaveText(/^[a-f0-9]{7}$/);
+  await expect(page.locator('#version')).toHaveAttribute('href', /^https:\/\/github.com\/pathikrit\/talbot\/commit\/[a-f0-9]{40}$/);
+  const whiteSlots = page.locator('#white-captures .capture-slot');
+  const blackSlots = page.locator('#black-captures .capture-slot');
+  await expect(whiteSlots).toHaveCount(0);
+  await expect(blackSlots).toHaveCount(0);
   await expect(page.locator('footer, .intro, .status-card, .player-row, details, #move-form')).toHaveCount(0);
   const box = await page.locator('#history').boundingBox();
   expect(box!.height).toBeGreaterThan(150);

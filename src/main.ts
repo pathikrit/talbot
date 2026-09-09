@@ -12,10 +12,7 @@ import './style.css';
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <header class="header">
     <h1>talbot</h1>
-    <nav aria-label="Game controls">
-      <button id="new-game">New game</button>
-      <button id="swap">Swap sides</button>
-    </nav>
+    <a id="version" class="version" href="https://github.com/pathikrit/talbot/commit/${__GIT_SHA__}" target="_blank" rel="noopener noreferrer" aria-label="View running commit ${__GIT_SHA__.slice(0, 7)}" ${__GIT_SHA__ ? '' : 'hidden'}>${__GIT_SHA__.slice(0, 7)}</a>
   </header>
   <main>
     <section class="board-area" aria-label="Chess game">
@@ -23,25 +20,31 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         <div id="eval-bar" class="eval-bar" role="meter" aria-label="Patricia evaluation, White's perspective" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" title="Patricia evaluation · White's perspective">
           <div id="eval-white" class="eval-white"></div><span id="eval-score">—</span>
         </div>
+        <div class="captures" aria-label="Captured pieces">
+          <div id="white-captures" class="captured-pieces cg-wrap" aria-label="Captured by White"></div>
+          <div id="black-captures" class="captured-pieces cg-wrap" aria-label="Captured by Black"></div>
+          <div id="material" class="material" title="Material only: pawn 1 · knight/bishop 3 · rook 5 · queen 9"><span id="material-side">Even</span><strong id="material-score"></strong></div>
+        </div>
         <div class="board-frame"><div id="board" aria-label="Chessboard. Drag or click pieces to move."></div></div>
-      </div>
-      <p id="status" class="sr-only" role="status" aria-live="polite">Loading Patricia…</p>
-      <p id="error" role="alert" hidden></p>
-    </section>
-    <section class="moves-panel" aria-labelledby="history-title">
-      <div class="captures" aria-label="Captured pieces">
-        <div class="capture-row"><span class="capture-label">White</span><div id="white-captures" class="captured-pieces cg-wrap" aria-label="Captured by White"></div></div>
-        <div class="capture-row"><span class="capture-label">Black</span><div id="black-captures" class="captured-pieces cg-wrap" aria-label="Captured by Black"></div></div>
-      </div>
-      <div class="moves-header">
-        <h2 id="history-title">Moves</h2>
-        <div class="history-controls">
-          <button id="undo" aria-keyshortcuts="ArrowLeft" title="Undo your move and the reply (←)">Undo</button>
-          <button id="redo" aria-keyshortcuts="ArrowRight" title="Replay the recorded turn (→)">Redo</button>
+        <div class="board-messages">
+          <p id="status" role="status" aria-live="polite">Loading Patricia…</p>
+          <p id="result" aria-live="polite" hidden></p>
+          <p id="error" role="alert" hidden></p>
+          <div id="draw-actions" hidden><button id="accept-draw">Accept draw</button> <button id="decline-draw">Decline draw</button></div>
         </div>
       </div>
+    </section>
+    <section class="moves-panel" aria-label="Move history">
+      <div class="moves-header">
+        <nav class="history-controls" aria-label="Game controls">
+          <button id="new-game">New game</button>
+          <button id="draw">Offer draw</button>
+          <button id="swap">Swap sides</button>
+          <button id="undo" aria-keyshortcuts="ArrowLeft" title="Undo your move and the reply (←)">Undo</button>
+          <button id="redo" aria-keyshortcuts="ArrowRight" title="Replay the recorded turn (→)">Redo</button>
+        </nav>
+      </div>
       <div id="history" class="history"></div>
-      <button id="resume" hidden>Continue from here</button>
     </section>
   </main>
   <dialog id="promotion"><form method="dialog"><h2>Promote pawn</h2><div class="promotion-options"><button value="q">Queen</button><button value="r">Rook</button><button value="b">Bishop</button><button value="n">Knight</button></div><button value="cancel" class="promotion-cancel">Cancel</button></form></dialog>
@@ -63,11 +66,15 @@ const board = Chessground(element('board'), {
   disableContextMenu: true,
 });
 
+new ResizeObserver(([entry]) => {
+  element('board').closest<HTMLElement>('.board-layout')!.style.setProperty('--board-size', `${entry.contentRect.width}px`);
+}).observe(element('board'));
+
 function onMove(from: Key, to: Key): void {
   // Chessground has optimistically moved the piece; cancel/error must restore it
   // even if the authoritative chess.js FEN has not changed.
   renderedBoard = '';
-  if (!controller.ready || controller.error || !game.humanTurn) { render(); return; }
+  if (!controller.ready || controller.error || !game.humanTurn || game.over) { render(); return; }
   const legal = game.chess.moves({ square: from as Square, verbose: true }).filter(move => move.to === to);
   if (legal.some(move => move.promotion)) {
     pendingPromotion = { from, to, revision: controller.revision };
@@ -89,7 +96,7 @@ promotion.addEventListener('close', () => {
 });
 
 function render(): void {
-  const canMove = controller.ready && !controller.error && controller.visible && game.humanTurn && !game.chess.isGameOver();
+  const canMove = controller.ready && !controller.error && controller.visible && game.humanTurn && !game.over;
   const last = game.history[game.cursor - 1];
   const boardKey = `${game.chess.fen()}:${game.human}:${canMove}`;
   if (boardKey !== renderedBoard) {
@@ -108,9 +115,11 @@ function render(): void {
   element('swap').title = `Playing ${colorName(game.human)} — switch sides`;
   const ending = game.ending();
   let evaluation = evaluationBar(controller.evaluation);
-  if (game.chess.isCheckmate()) evaluation = game.chess.turn() === 'b'
+  if (game.resigned) evaluation = game.resigned === 'b'
     ? { percent: 100, label: '1–0' } : { percent: 0, label: '0–1' };
-  else if (game.chess.isDraw()) evaluation = { percent: 50, label: '½–½' };
+  else if (game.chess.isCheckmate()) evaluation = game.chess.turn() === 'b'
+    ? { percent: 100, label: '1–0' } : { percent: 0, label: '0–1' };
+  else if (game.agreedDraw || game.chess.isDraw()) evaluation = { percent: 50, label: '½–½' };
   element('eval-white').style.height = `${evaluation.percent}%`;
   element('eval-bar').classList.toggle('black', game.human === 'b');
   element('eval-bar').setAttribute('aria-valuenow', String(Math.round(evaluation.percent)));
@@ -125,22 +134,47 @@ function render(): void {
   element('error').textContent = controller.error;
   element<HTMLButtonElement>('undo').disabled = !game.cursor;
   element<HTMLButtonElement>('redo').disabled = game.cursor >= game.history.length;
-  element<HTMLButtonElement>('resume').hidden = !(game.reviewing && !game.humanTurn && !ending);
   element<HTMLButtonElement>('new-game').disabled = !!controller.error;
+  element('new-game').textContent = game.active ? 'Resign' : 'New game';
+  element('draw').textContent = controller.drawOffer === 'engine' ? 'Accept draw' : controller.drawOffer === 'human' ? 'Draw offered' : 'Offer draw';
+  element<HTMLButtonElement>('draw').disabled = !controller.ready || !!controller.error || !game.active || controller.drawOffer === 'human';
+  const result = ending ?? (controller.drawOffer === 'engine' ? 'Talbot offers a draw' : controller.drawNotice);
+  element('result').hidden = !result;
+  element('result').textContent = result ? result[0].toUpperCase() + result.slice(1) : '';
+  element('status').classList.toggle('sr-only', !!result || !!controller.error);
+  element('draw-actions').hidden = controller.drawOffer !== 'engine';
   const historyKey = `${game.cursor}:${game.history.map(move => move.san).join(' ')}`;
   if (historyKey !== renderedHistory) {
     renderedHistory = historyKey;
     const roles = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king' };
+    const captures = { w: game.captures('w'), b: game.captures('b') };
+    const material = game.materialDifference;
+    const ahead = material > 0 ? 'White' : 'Black';
+    element('material-side').textContent = material ? ahead : 'Even';
+    element('material-score').textContent = material ? `+${Math.abs(material)}` : '';
+    element('material').setAttribute('aria-label', material ? `${ahead} is ahead by ${Math.abs(material)} material points` : 'Material is equal');
+    const types = ['q', 'r', 'b', 'n', 'p'] as const;
+    const rows = types.map(type => Math.max(...(['w', 'b'] as const).map(by => captures[by].filter(piece => piece === type).length)));
+    element('board').closest<HTMLElement>('.board-layout')!.style.setProperty('--capture-rows', String(Math.max(1, rows.reduce((a, b) => a + b, 0))));
     for (const by of ['w', 'b'] as const) {
       const row = element(`${colorName(by)}-captures`);
       row.replaceChildren();
-      for (const captured of game.captures(by)) {
-        const piece = document.createElement('piece');
-        const color = by === 'w' ? 'black' : 'white';
-        piece.className = `${roles[captured]} ${color}`;
-        piece.setAttribute('role', 'img');
-        piece.setAttribute('aria-label', `${color} ${roles[captured]}`);
-        row.append(piece);
+      for (const [index, captured] of types.entries()) {
+        if (!rows[index]) continue;
+        const slot = document.createElement('div');
+        slot.className = 'capture-slot';
+        slot.dataset.piece = captured;
+        slot.style.height = `calc(var(--capture-size) * ${rows[index]})`;
+        row.append(slot);
+        const count = captures[by].filter(piece => piece === captured).length;
+        for (let i = 0; i < count; i++) {
+          const piece = document.createElement('piece');
+          const color = by === 'w' ? 'black' : 'white';
+          piece.className = `${roles[captured]} ${color}`;
+          piece.setAttribute('role', 'img');
+          piece.setAttribute('aria-label', `${color} ${roles[captured]}`);
+          slot.append(piece);
+        }
       }
     }
     const history = element('history');
@@ -154,9 +188,18 @@ function render(): void {
       row.append(number);
       for (const index of [i, i + 1]) {
         const move = game.history[index];
-        const cell = document.createElement('span');
+        const cell = document.createElement(move ? 'button' : 'span');
         cell.className = `move${index >= game.cursor ? ' future' : ''}${index === game.cursor - 1 ? ' current' : ''}`;
         cell.textContent = move?.san ?? '';
+        if (move) {
+          cell.title = `Return to position after ${Math.floor(index / 2) + 1}${move.color === 'w' ? '.' : '…'} ${move.san}`;
+          cell.setAttribute('aria-current', String(index === game.cursor - 1));
+          cell.addEventListener('click', () => {
+            pendingPromotion = undefined;
+            if (promotion.open) promotion.close();
+            controller.seek(index + 1);
+          });
+        }
         row.append(cell);
       }
       history.append(row);
@@ -167,8 +210,10 @@ function render(): void {
 }
 
 for (const [id, action] of Object.entries({
-  'new-game': () => controller.newGame(), swap: () => controller.swap(),
-  undo: () => controller.undo(), redo: () => controller.redo(), resume: () => controller.resume(),
+  'new-game': () => game.active ? controller.resign() : controller.newGame(), swap: () => controller.swap(),
+  draw: () => controller.drawOffer === 'engine' ? controller.acceptDraw() : controller.offerDraw(),
+  'accept-draw': () => controller.acceptDraw(), 'decline-draw': () => controller.declineDraw(),
+  undo: () => controller.undo(), redo: () => controller.redo(),
 })) element(id).addEventListener('click', () => {
   pendingPromotion = undefined;
   if (promotion.open) promotion.close();
@@ -177,6 +222,7 @@ for (const [id, action] of Object.entries({
 
 document.addEventListener('keydown', event => {
   if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || promotion.open) return;
+  if (event.key === 'Escape' && controller.drawOffer === 'engine') { controller.declineDraw(); return; }
   const target = event.target;
   if (target instanceof HTMLElement && (target.isContentEditable || target.closest('input, textarea, select'))) return;
   const id = event.key === 'ArrowLeft' ? 'undo' : event.key === 'ArrowRight' ? 'redo' : undefined;
