@@ -51,6 +51,52 @@ test('the staged production worker deepens and selects a future declined sacrifi
   expect(response.selected?.depth).toBe(8);
 });
 
+test('the production worker avoids an immediate repetition within the configured 1cp', async ({ page }) => {
+  await page.route('**/harness.html', route => route.fulfill({ contentType: 'text/html', body: '<title>Worker test</title>' }));
+  await page.route('**/fixture/patricia.js', route => route.fulfill({ contentType: 'text/javascript', body: `
+    export default async function({ print }) {
+      return { ccall(name) {
+        if (name === 'talbot_position') return 1;
+        if (name === 'talbot_search' || name === 'talbot_search_moves') {
+          const depth = name === 'talbot_search' ? 4 : 8;
+          print('info depth ' + depth + ' multipv 1 score cp 20 pv f6g8');
+          print('info depth ' + depth + ' multipv 2 score cp 19 pv b8c6');
+          print('bestmove f6g8');
+          return Promise.resolve();
+        }
+      }};
+    }
+  ` }));
+  await page.goto('./harness.html');
+  const response = await page.evaluate(async ({ asset, fen }) => {
+    const worker = new Worker(new URL(`assets/${asset}`, location.href), { type: 'module' });
+    try {
+      return await new Promise<{ move: string; selected?: { pv: string[]; score: { value: number } } }>((resolve, reject) => {
+        const seen: unknown[] = [];
+        const timer = setTimeout(() => reject(new Error(`Worker timed out after ${JSON.stringify(seen)}`)), 3000);
+        worker.onerror = error => { clearTimeout(timer); reject(new Error(error.message)); };
+        worker.onmessage = ({ data }) => {
+          seen.push(data);
+          if (data.type === 'ready') worker.postMessage({
+            type: 'search', id: 1, multipv: 2,
+            position: {
+              fen,
+              moves: ['g1f3', 'g8f6', 'f3g1', 'f6g8', 'g1f3', 'g8f6', 'f3g1'],
+            },
+            deadline: performance.timeOrigin + performance.now() + 1000,
+          });
+          if (data.type === 'bestmove') { clearTimeout(timer); resolve(data); }
+          if (data.type === 'error') { clearTimeout(timer); reject(new Error(data.message)); }
+        };
+        worker.postMessage({ type: 'init', assetBase: new URL('fixture/', location.href).href });
+      });
+    } finally { worker.terminate(); }
+  }, { asset: workerAsset, fen: DEFAULT_POSITION });
+  expect(response.move).toBe('b8c6');
+  expect(response.selected?.pv[0]).toBe('b8c6');
+  expect(response.selected?.score.value).toBe(19);
+});
+
 test('bundled book follows a committed opening but falls back on deviation or excessive loss', async ({ page }) => {
   const lineId = openingData.lines.find(line => line.family === 'evans')!.id;
   await page.route('**/harness.html', route => route.fulfill({ contentType: 'text/html', body: '<title>Book test</title>' }));

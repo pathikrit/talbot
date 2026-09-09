@@ -176,6 +176,39 @@ export function offersSacrifice(fen: string, pv: string[], budget: ProbeBudget):
   return sacrificeSize(fen, pv, budget) >= 100;
 }
 
+/** True only when a supplied line actually reaches a rules-based draw. The
+ * live Chess object is intentional: repetition cannot be reconstructed from
+ * its current FEN. Every speculative move is undone before returning.
+ */
+export function drawsInLine(position: Chess, pv: string[]): boolean {
+  let played = 0;
+  try {
+    for (const move of pv) {
+      position.move(move);
+      played++;
+      if (position.isDraw()) return true;
+      if (position.isCheckmate()) return false;
+    }
+  } catch { /* Invalid or truncated analysis is not evidence of a draw. */
+  } finally {
+    while (played--) position.undo();
+  }
+  return false;
+}
+
+/** Replace a drawing choice only with a fully searched non-drawing line whose
+ * evaluation is no more than the configured number of centipawns worse.
+ */
+export function avoidDraw(position: Chess, candidates: CandidateSet, chosen: Analysis): Analysis {
+  if (chosen.score.kind !== 'cp' || !drawsInLine(position, chosen.pv)) return chosen;
+  const batch = candidates.complete;
+  if (!batch.length || batch[0].depth < 4 || batch.some(info => info.score.kind !== 'cp')) return chosen;
+  return batch.filter(info => info.score.kind === 'cp'
+      && info.score.value >= chosen.score.value - settings.maxDrawAvoidanceLossCp
+      && !drawsInLine(position, info.pv))
+    .sort((a, b) => b.score.value - a.score.value || a.multipv - b.multipv)[0] ?? chosen;
+}
+
 /** Shared safety gate for book moves and material-sacrifice selection. */
 export function eligibleCandidates(candidates: CandidateSet, fallback: string): Analysis[] {
   const batch = candidates.complete;
@@ -192,14 +225,14 @@ export function eligibleCandidates(candidates: CandidateSet, fallback: string): 
  * sacrifice roots for the focused second search stage.
  */
 export function shortlistCandidates(fen: string, candidates: CandidateSet, fallback: string,
-  limit: number, preferred?: string): string[] {
+  limit: number, preferred?: string, drawAlternative?: string): string[] {
   const eligible = eligibleCandidates(candidates, fallback);
   if (!eligible.length) return [fallback];
   const ranked = eligible.map(info => ({ info, potential: sacrificePotential(fen, info.pv) }))
     .sort((a, b) => b.potential - a.potential || b.info.score.value - a.info.score.value
       || a.info.multipv - b.info.multipv);
   const moves: string[] = [];
-  for (const move of [fallback, preferred, ...ranked.map(row => row.info.pv[0])]) {
+  for (const move of [fallback, preferred, drawAlternative, ...ranked.map(row => row.info.pv[0])]) {
     if (move && !moves.includes(move)) moves.push(move);
     if (moves.length >= limit) break;
   }

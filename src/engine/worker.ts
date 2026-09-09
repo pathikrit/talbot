@@ -1,6 +1,6 @@
 import { Chess } from 'chess.js';
 import { now, parseInfo } from './protocol';
-import { CandidateSet, chooseSacrifice, shortlistCandidates, SELECTOR_RESERVE_MS } from './sacrifice';
+import { avoidDraw, CandidateSet, chooseSacrifice, shortlistCandidates, SELECTOR_RESERVE_MS } from './sacrifice';
 import { openingBook } from './openings';
 import type { EngineRequest, EngineResponse, SearchRequest } from './protocol';
 
@@ -78,8 +78,11 @@ async function drain(): Promise<void> {
         if (!broad.bestmove || active !== job || pending || resetPending) continue;
         const broadBook = openingBook.choose(position, job.position, broad.candidates, broad.bestmove,
           job.opening, undefined, job.recentOpenings);
+        const broadBest = broad.candidates.complete.find(info => info.pv[0] === broad.bestmove);
+        const broadAlternative = broadBest && avoidDraw(position, broad.candidates, broadBest);
         const roots = shortlistCandidates(position.fen(), broad.candidates, broad.bestmove,
-          FINALIST_MULTIPV, broadBook?.analysis.pv[0]);
+          FINALIST_MULTIPV, broadBook?.analysis.pv[0],
+          broadAlternative?.pv[0] === broad.bestmove ? undefined : broadAlternative?.pv[0]);
         const focusedTime = Math.max(0, Math.floor(job.deadline - now() - SELECTOR_RESERVE_MS));
         const focused = focusedTime > 0
           ? await searchStage(position, focusedTime, roots.length, roots)
@@ -87,10 +90,14 @@ async function drain(): Promise<void> {
         if (!focused.bestmove || active !== job || pending || resetPending) continue;
         const book = broadBook && openingBook.choose(position, job.position, focused.candidates,
           focused.bestmove, broadBook.lineId);
-        const selected = book?.analysis ?? chooseSacrifice(position.fen(), focused.candidates, focused.bestmove,
+        const styled = book?.analysis ?? chooseSacrifice(position.fen(), focused.candidates, focused.bestmove,
           performance.now() + Math.max(0, Math.min(80, job.deadline - now() - 5)));
-        send({ type: 'bestmove', id: job.id, move: selected?.pv[0] ?? focused.bestmove,
-          selected, opening: book?.lineId ?? null });
+        const proposed = styled ?? focused.candidates.complete.find(info => info.pv[0] === focused.bestmove);
+        const drawSafe = proposed && avoidDraw(position, focused.candidates, proposed);
+        const selected = drawSafe && (styled || drawSafe.pv[0] !== focused.bestmove) ? drawSafe : undefined;
+        const opening = book && drawSafe?.pv[0] === book.analysis.pv[0] ? book.lineId : null;
+        send({ type: 'bestmove', id: job.id, move: drawSafe?.pv[0] ?? focused.bestmove,
+          selected, opening });
       } finally { active = undefined; }
     }
   } catch (error) { fail(error); }

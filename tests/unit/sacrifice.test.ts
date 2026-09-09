@@ -1,6 +1,6 @@
 import { Chess } from 'chess.js';
 import { describe, expect, it } from 'vitest';
-import { CandidateSet, chooseSacrifice, lineSacrificeSize, offersSacrifice, sacrificePotential,
+import { avoidDraw, CandidateSet, chooseSacrifice, drawsInLine, lineSacrificeSize, offersSacrifice, sacrificePotential,
   sacrificeSize, shortlistCandidates } from '../../src/engine/sacrifice';
 import { parseInfo } from '../../src/engine/protocol';
 import { settings } from '../../src/settings';
@@ -52,6 +52,26 @@ describe('lasting material offers', () => {
 });
 
 describe('candidate ranking', () => {
+  it('avoids a threefold repetition for no more than the configured cp loss', () => {
+    const chess = new Chess();
+    ['g1f3', 'g8f6', 'f3g1', 'f6g8', 'g1f3', 'g8f6', 'f3g1'].forEach(move => chess.move(move));
+    const before = chess.fen();
+    const set = new CandidateSet(2);
+    set.add(info(1, 'f6g8', 20));
+    set.add(info(2, 'b8c6', 20 - settings.maxDrawAvoidanceLossCp));
+    expect(drawsInLine(chess, ['f6g8'])).toBe(true);
+    expect(avoidDraw(chess, set, set.complete[0]).pv[0]).toBe('b8c6');
+    expect(chess.fen()).toBe(before);
+
+    set.add(info(1, 'f6g8', 20, 8));
+    set.add(info(2, 'b8c6', 19 - settings.maxDrawAvoidanceLossCp, 8));
+    expect(avoidDraw(chess, set, set.complete[0]).pv[0]).toBe('f6g8');
+  });
+  it('also recognizes non-repetition rules draws without avoiding wins', () => {
+    const chess = new Chess('kr6/2B5/8/8/8/8/8/7K w - - 0 1');
+    expect(drawsInLine(chess, ['c7b8'])).toBe(true);
+    expect(drawsInLine(chess, ['c7d6'])).toBe(false);
+  });
   it('waits for a complete distinct common-depth set', () => {
     const set = new CandidateSet(2);
     set.add(info(1, 'h1g1', 50));

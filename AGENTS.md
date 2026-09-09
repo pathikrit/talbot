@@ -153,8 +153,10 @@ comparable. Partial newer iterations do not replace it. Mate scores disable
 selection; an unavailable fallback move, incomplete batch, or no qualifying
 offer leaves Patricia's best move unchanged.
 
-Root `settings.json` has one setting: `maxSacrificeLossCp`, the allowed evaluation
-loss (nonnegative integer). MultiPV is internal (`SEARCH_MULTIPV` in src/settings.ts),
+Root `settings.json` has two settings: `maxSacrificeLossCp`, the allowed sacrifice
+evaluation loss, and `maxDrawAvoidanceLossCp`, the extra evaluation loss allowed
+to avoid a line that actually ends in a rules-based draw (both nonnegative
+integers in centipawns). MultiPV is internal (`SEARCH_MULTIPV` in src/settings.ts),
 not another user-facing style parameter. The worker imports validated build-time
 settings. Refresh after
 editing in dev; rebuild/redeploy for GitHub Pages. No runtime configuration fetch
@@ -193,6 +195,17 @@ but its speculative candidates are never reused as actual-root evidence.
 Chosen moves return their own analysis/PV so evaluation and the next ponder
 prediction match the move actually played. Cancelled jobs must not select or
 emit a result. The controller still holds early replies until the deadline.
+
+After book/sacrifice selection, draw avoidance has final say. If the proposed PV
+actually reaches threefold repetition, stalemate, the fifty-move rule, or
+insufficient material, choose the best fully searched non-drawing candidate no
+more than `maxDrawAvoidanceLossCp` worse. Test repetition against the reconstructed
+move history, never the current FEN alone. Reserve a qualifying broad alternative
+among the six focused roots when Patricia's broad best line draws. A merely equal
+or drawish evaluation is not a rules draw and must not trigger this override;
+mate lines and incomplete/shallow/mixed-score batches retain the proposed move.
+If the override replaces a book move, leave that book line instead of recording
+a plan that was not played.
 
 ### Opening repertoire
 
