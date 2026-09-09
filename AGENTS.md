@@ -12,6 +12,8 @@ Technical documentation belongs in this file.
   up-down for swapping. Bundle selected SVG paths, not a CDN kit or full font.
   Left/Right arrow keys trigger the same buttons;
   ignore modified keys, editable fields, and the promotion dialog.
+- Keep the five history controls in an explicit single-row CSS grid. Flex wrapping
+  varies with Linux Firefox/WebKit font metrics and blocks the Pages CI gate.
 - Black captured pieces disappear on charcoal. Use a muted warm-taupe capture tray.
   Show every capture individually, no count badges; each gets half a board square
   in height. Align type groups across both columns using the larger group's count.
@@ -133,6 +135,8 @@ human-skill mode, random sacrifices, or Stockfish guardrail is enabled.
 Patricia supports MultiPV 1–255, capped at the number of legal root moves.
 The typed worker interface accepts `multipv` and returns indexed analysis with
 depth, cp/mate score, nodes, NPS, and PV. Bound-only output is filtered out.
+Keep all MultiPV candidates inside the worker and forward only multipv 1 info to
+the controller; rendering every candidate can starve pointer events during search.
 
 ### Sacrifice selection
 
@@ -250,6 +254,8 @@ Only controller-committed human/engine moves emit sound; capture includes en pas
 Six clips: move-self, move-opponent, capture, castle, move-check, promote.
 One sound per move: check/mate > promotion > castle > capture > self/opponent.
 No countdown/result/UI sounds; checkmate uses the check clip, not a defeat sound.
+Browser sound tests use a deterministic fake audio device; real decoder startup
+and autoplay timing differ across CI browsers and are not application semantics.
 Undo/redo/seek/ponder/cancelled replies stay silent. Audio unlocks on user gestures,
 does not queue blocked sounds, and failures never block chess. A small header toggle
 mutes sound for the session. Vite bundles six MP3s (30,198 bytes total); preload

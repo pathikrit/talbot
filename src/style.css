@@ -46,8 +46,8 @@ cg-board square.check { background: radial-gradient(ellipse at center, #df745ddd
 .captured-pieces.cg-wrap piece { position: static; display: block; width: 100%; height: var(--capture-size); background-size: contain; background-position: center; background-repeat: no-repeat; will-change: auto; }
 .moves-header { display: flex; flex-direction: column; align-items: stretch; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #41403e; }
 h2 { font-size: 15px; font-weight: 600; margin: 0; }
-.history-controls { display: flex; gap: 4px; flex-wrap: wrap; }
-.history-controls button { font-size: 11px; padding: 7px 6px; white-space: nowrap; }
+.history-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 28px 28px 28px; gap: 4px; }
+.history-controls button { min-width: 0; font-size: 10px; padding: 7px 3px; white-space: nowrap; }
 .board-messages { grid-column: 3; text-align: center; min-width: 0; font-size: 13px; line-height: 1.5; color: #a29c94; }
 .board-messages p { margin: 4px 0 0; }
 #result { color: #d6b383; }

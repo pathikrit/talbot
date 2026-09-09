@@ -112,7 +112,9 @@ onmessage = (event: MessageEvent<EngineRequest>) => {
           const analysis = parseInfo(line);
           if (analysis) {
             candidates?.add(analysis);
-            send({ type: 'info', id: active.id, analysis });
+            // MultiPV belongs in the worker. The UI only consumes the principal
+            // variation; forwarding every line can starve pointer events.
+            if (analysis.multipv === 1) send({ type: 'info', id: active.id, analysis });
           }
           const move = line.match(/^bestmove (\S+)/)?.[1];
           if (move) bestmove = move;

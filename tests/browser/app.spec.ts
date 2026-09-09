@@ -23,11 +23,25 @@ async function fen(page: Page): Promise<string> { return (await page.locator('#b
 
 test('plays move sounds after interaction and stays silent when muted or navigating history', async ({ page }) => {
   await page.addInitScript(() => {
-    const start = AudioBufferSourceNode.prototype.start;
-    AudioBufferSourceNode.prototype.start = function (...args: Parameters<typeof start>) {
-      document.documentElement.dataset.soundCount = String(Number(document.documentElement.dataset.soundCount ?? 0) + 1);
-      return start.apply(this, args);
-    };
+    class TestAudioContext {
+      state: AudioContextState = 'running';
+      destination = {} as AudioDestinationNode;
+      createGain() {
+        return { gain: { value: 1 }, connect() {} } as unknown as GainNode;
+      }
+      decodeAudioData() { return Promise.resolve({} as AudioBuffer); }
+      resume() { this.state = 'running'; return Promise.resolve(); }
+      createBufferSource() {
+        return {
+          buffer: null, onended: null, connect() {}, disconnect() {},
+          start() {
+            document.documentElement.dataset.soundCount = String(
+              Number(document.documentElement.dataset.soundCount ?? 0) + 1);
+          },
+        } as unknown as AudioBufferSourceNode;
+      }
+    }
+    Object.defineProperty(window, 'AudioContext', { configurable: true, value: TestAudioContext });
   });
   await ready(page);
   await expect(page.locator('html')).not.toHaveAttribute('data-sound-count', /.+/);
