@@ -41,6 +41,12 @@ test('loads at a repository subpath, plays on the board, replies in one second, 
   expect(await fen(page)).toBe(DEFAULT_POSITION);
   await page.getByRole('button', { name: 'Redo', exact: true }).click();
   expect(await fen(page)).toBe(afterReply);
+  await page.keyboard.press('ArrowLeft');
+  expect(await fen(page)).toBe(DEFAULT_POSITION);
+  await page.keyboard.press('ArrowRight');
+  expect(await fen(page)).toBe(afterReply);
+  await page.keyboard.press('Shift+ArrowLeft');
+  expect(await fen(page)).toBe(afterReply);
   expect(errors).toEqual([]);
   await expect(page.locator('piece.anim')).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath('talbot.png'), fullPage: true });
@@ -166,6 +172,12 @@ test('shows only the compact game interface', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('talbot');
   await expect(page.getByRole('heading', { level: 2 })).toHaveText('Moves');
   await expect(page.getByRole('button', { name: 'Undo', exact: true })).toBeVisible();
+  for (const name of ['Undo', 'Redo']) {
+    const button = page.getByRole('button', { name, exact: true });
+    await expect(button).toHaveText(name);
+    await expect(button).toHaveAttribute('aria-keyshortcuts', name === 'Undo' ? 'ArrowLeft' : 'ArrowRight');
+    await expect(button).toHaveAttribute('title', /.+/);
+  }
   await expect(page.getByRole('meter')).toBeVisible();
   await expect(page.locator('#eval-score')).not.toHaveText('—');
   const bar = (await page.locator('#eval-bar').boundingBox())!;

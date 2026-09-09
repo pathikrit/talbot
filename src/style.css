@@ -31,11 +31,11 @@ cg-board square.check { background: radial-gradient(ellipse at center, #df745ddd
 .cg-wrap coords.files coord { padding-right: 3px; }
 .cg-wrap coords coord { color: #3d2917; }
 .moves-panel { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
-.captures { padding-bottom: 14px; }
-.capture-row { display: flex; align-items: center; min-height: 26px; gap: 8px; }
-.capture-label { width: 34px; flex: none; color: #a29c94; font-size: 11px; }
-.captured-pieces.cg-wrap { display: flex; flex-wrap: wrap; gap: 0; min-height: 24px; }
-.captured-pieces.cg-wrap piece { position: static; display: block; flex: none; width: 24px; height: 24px; will-change: auto; }
+.captures { margin-bottom: 14px; padding: 8px 10px; border: 1px solid #b49b7a; border-radius: 4px; background: #c6ae8c; }
+.capture-row { display: flex; align-items: center; min-height: 32px; gap: 8px; }
+.capture-label { width: 34px; flex: none; color: #463827; font-size: 11px; }
+.captured-pieces.cg-wrap { display: flex; flex-wrap: wrap; gap: 0; min-height: 28px; min-width: 0; }
+.captured-pieces.cg-wrap piece { position: static; display: block; flex: none; width: 28px; height: 28px; will-change: auto; }
 .moves-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid #41403e; }
 h2 { font-size: 15px; font-weight: 600; margin: 0; }
 .history-controls { display: flex; gap: 6px; }

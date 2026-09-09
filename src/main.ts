@@ -36,8 +36,8 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <div class="moves-header">
         <h2 id="history-title">Moves</h2>
         <div class="history-controls">
-          <button id="undo" title="Undo your move and the reply">Undo</button>
-          <button id="redo" title="Replay the recorded turn">Redo</button>
+          <button id="undo" aria-keyshortcuts="ArrowLeft" title="Undo your move and the reply (←)">Undo</button>
+          <button id="redo" aria-keyshortcuts="ArrowRight" title="Replay the recorded turn (→)">Redo</button>
         </div>
       </div>
       <div id="history" class="history"></div>
@@ -173,6 +173,16 @@ for (const [id, action] of Object.entries({
   pendingPromotion = undefined;
   if (promotion.open) promotion.close();
   action();
+});
+
+document.addEventListener('keydown', event => {
+  if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || promotion.open) return;
+  const target = event.target;
+  if (target instanceof HTMLElement && (target.isContentEditable || target.closest('input, textarea, select'))) return;
+  const id = event.key === 'ArrowLeft' ? 'undo' : event.key === 'ArrowRight' ? 'redo' : undefined;
+  if (!id) return;
+  event.preventDefault();
+  element<HTMLButtonElement>(id).click();
 });
 
 worker.onmessage = (event: MessageEvent<EngineResponse>) => controller.receive(event.data);
