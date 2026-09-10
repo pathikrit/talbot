@@ -3,9 +3,9 @@
 Keep README.md limited to the user's one-liner, build badge, and `make dev`.
 Technical documentation belongs in this file.
 
-- Preserve the minimal UI: talbot header, New game / Swap sides, compact Tal
-  portrait/commentary above the wooden board, left-hand evaluation bar and
-  capture strip, Undo / Redo.
+- Preserve the minimal UI: Tal portrait beside the talbot header, compact
+  commentary above the wooden board, evaluation bar on its left, capture strip
+  on its right, and New game / Offer draw / Swap sides / Undo / Redo centered below.
   No marketing copy, status cards, footer, or keyboard-entry form.
 - Use Font Awesome Free Solid icons for mute, swap, undo and redo, with hover titles
   Mute/UnMute, Swap Sides, Undo Move, Redo Move and accessible button names.
@@ -13,7 +13,7 @@ Technical documentation belongs in this file.
   up-down for swapping. Bundle selected SVG paths, not a CDN kit or full font.
   Left/Right arrow keys trigger the same buttons;
   ignore modified keys, editable fields, and the promotion dialog.
-- Keep the five history controls in an explicit single-row CSS grid. Flex wrapping
+- Keep the five game controls in an explicit single-row CSS grid. Flex wrapping
   varies with Linux Firefox/WebKit font metrics and blocks the Pages CI gate.
 - Black captured pieces disappear on charcoal. Use a muted warm-taupe capture tray.
   Show every capture individually, no count badges; each gets half a board square
@@ -102,11 +102,11 @@ run. Opening `index.html` as a file is not supported; workers/WASM need HTTP(S).
 ## Playing
 
 - You start as White. Click or drag pieces. Promotions offer queen, rook,
-  bishop, or knight. The UI is a header, board, and Moves list.
+  bishop, or knight. The UI is a header and a compact board assembly.
 - A left-hand evaluation bar shows Patricia's score from White's perspective
   (positive favors White, negative favors Black, `#` indicates mate). Speculative
   ponder scores do not overwrite the current position's evaluation. Captured
-  pieces are grouped by capturing side between evaluation and board and follow undo/redo.
+  pieces are grouped by capturing side to the right of the board and follow undo/redo.
 - Talbot replies automatically after approximately one second. Browser
   scheduling and very slow devices can introduce small overruns.
 - Swap sides at any time, including during a search. You take over the other
@@ -329,18 +329,17 @@ the same Talbot variant on both targets, not unmodified upstream strength.
 The header's version link embeds the build-time Git HEAD SHA (GITHUB_SHA fallback
 for builds without Git metadata). It links directly to that GitHub commit; local
 uncommitted edits are not represented by the SHA. Restart dev after changing HEAD.
-The move-list toolbar has no visible heading and holds five controls in order:
+The centered toolbar below the board holds five controls in order:
 New game/Resign, Offer/Accept draw, Swap sides, Undo, Redo.
-The move panel is capped at 240px. At <=800px it stacks centered below the fluid
-board and messages; larger viewports keep it beside the board. Check 320–1280px
-widths for overflow, square aspect ratio and the five-button single-row toolbar.
+Keep the evaluation bar to the board's left and the capture tray to its right at
+all viewport sizes. Check 320–1280px widths for overflow, square aspect ratio,
+side-rail order, and the five-button single-row toolbar.
 New game becomes Resign after a
 move or while the engine starts as White. Resigning records the current human
 color, cancels searches and buffered replies, and locks play; swapping does not
 change the result. Undo/redo navigation clears resignation to allow exploration.
 Agreement draws behave the same way. All messaging (status, results, draw offers,
-and errors) belongs in the compact portrait row above the board assembly, not
-in Moves.
+and errors) belongs in the compact row above the board assembly.
 Draw negotiation is an application policy, not a native Patricia/UCI offer:
 use actual-root depth >= 8 evaluation, accepting if engine score <= 20cp or
 it faces a forced mate. Unknown/shallow scores wait; speculative ponder scores
@@ -350,7 +349,7 @@ Escape declines. Swaps/history changes/new moves clear pending offers. Draw
 agreement cancels buffered replies and searches. Fifty-move and threefold draws
 remain automatic app adjudication (not tournament claim UI); checkmate takes
 precedence over the fifty-move rule. Do not advertise full FIDE claim handling.
-Captured pieces sit between evaluation and board in two aligned columns, ordered
+Captured pieces sit to the right of the board in two aligned columns, ordered
 queen/rook/bishop/knight/pawn with individual icons and a warm-taupe tray.
 ResizeObserver sizes capture rows to board width / 16; exceptionally more aligned
 rows (from promotions) shrink proportionally to fit without overflowing the material badge.
@@ -358,9 +357,9 @@ The bottom of the capture strip shows Even or the leading color and +N material.
 Calculate White-minus-Black from the current board, not capture totals, so promotions
 work: pawn 1, bishop/knight 3, rook 5, queen 9, king 0. Keep separate from engine eval.
 Omit a type's row when neither side has captured it, avoiding empty gaps above pawns.
-Move-list buttons seek to the position immediately after that move, preserving
-future history for replay. Controller.seek cancels stale searches; computer-turn
-positions automatically restart the reply timer, while human-turn positions allow branching.
+Undo and redo preserve future history for replay. Controller.seek cancels stale
+searches; computer-turn positions automatically restart the reply timer, while
+human-turn positions allow branching.
 
 Push this repository to GitHub, then select **Settings → Pages → Source → GitHub
 Actions**. The included workflow runs `make gh-page` to produce the static site,

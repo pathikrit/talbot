@@ -6,18 +6,19 @@ button:hover:not(:disabled) { background: #41403d; }
 button:disabled { opacity: .35; cursor: default; }
 button:focus-visible { outline: 2px solid #d6b383; outline-offset: 3px; }
 [hidden] { display: none !important; }
-.header { max-width: 952px; margin: auto; padding: 22px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.header { max-width: 688px; margin: auto; padding: 22px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand { min-width: 0; display: flex; align-items: center; gap: 10px; }
 h1 { font: 700 34px/1 Georgia, serif; letter-spacing: -1.5px; margin: 0; }
 nav { display: flex; gap: 8px; }
 .version { color: #a29c94; font: 12px monospace; text-decoration: none; }
 .version:hover { color: #f0d7b2; text-decoration: underline; }
 .header-tools { display: flex; align-items: center; gap: 12px; }
 #sound { font-size: 11px; padding: 5px 7px; color: #a29c94; }
-main { max-width: 952px; margin: 0 auto 24px; padding: 0 24px; display: grid; grid-template-columns: minmax(0, 640px) 240px; align-items: stretch; gap: 24px; }
+main { max-width: 688px; margin: 0 auto 24px; padding: 0 24px; }
 .icon-button { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 5px; flex: none; }
 .control-icon { display: block; width: 14px; height: 14px; }
 .board-area { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
-.board-layout { --capture-size: min(calc(var(--board-size, 448px) / 16), calc((var(--board-size, 448px) - 40px) / var(--capture-rows, 16))); display: grid; grid-template-columns: 24px 58px minmax(0, 1fr); gap: 8px; }
+.board-layout { --capture-size: min(calc(var(--board-size, 448px) / 16), calc((var(--board-size, 448px) - 40px) / var(--capture-rows, 16))); display: grid; grid-template-columns: 24px minmax(0, 1fr) 58px; gap: 8px; }
 .eval-bar { position: relative; overflow: hidden; background: #111; border: 1px solid #55504a; border-radius: 3px; }
 .eval-white { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: #e6e2da; transition: height .25s; }
 .eval-bar.black .eval-white { bottom: auto; top: 0; }
@@ -36,7 +37,6 @@ cg-board square.check { background: radial-gradient(ellipse at center, #df745ddd
 .cg-wrap coords.files { bottom: 1px; left: 0; height: 11px; text-align: right; text-transform: lowercase; }
 .cg-wrap coords.files coord { padding-right: 3px; }
 .cg-wrap coords coord { color: #3d2917; }
-.moves-panel { width: 240px; max-width: 100%; justify-self: center; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 .captures { position: relative; border: 1px solid #8b8174; border-radius: 4px; background: #a39888; }
 .material { position: absolute; bottom: 4px; left: 3px; right: 3px; height: 34px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #302c27; border-top: 1px solid #302c2733; font-size: 10px; line-height: 1.2; }
 .material strong { font-size: 14px; font-variant-numeric: tabular-nums; }
@@ -44,24 +44,16 @@ cg-board square.check { background: radial-gradient(ellipse at center, #df745ddd
 #black-captures { left: 50%; }
 .capture-slot { width: 100%; }
 .captured-pieces.cg-wrap piece { position: static; display: block; width: 100%; height: var(--capture-size); background-size: contain; background-position: center; background-repeat: no-repeat; will-change: auto; }
-.moves-header { display: flex; flex-direction: column; align-items: stretch; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #41403e; }
 h2 { font-size: 15px; font-weight: 600; margin: 0; }
-.history-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 28px 28px 28px; gap: 4px; }
-.history-controls button { min-width: 0; font-size: 10px; padding: 7px 3px; white-space: nowrap; }
-.board-messages { min-width: 0; min-height: 44px; display: flex; align-items: center; gap: 10px; font-size: 13px; line-height: 1.5; color: #a29c94; }
-.tal-portrait-link { display: block; width: 44px; height: 44px; flex: none; border-radius: 3px; }
+.game-controls { width: min(100%, 360px); align-self: center; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 28px 28px 28px; gap: 4px; }
+.game-controls button { min-width: 0; font-size: 10px; padding: 7px 3px; white-space: nowrap; }
+.board-messages { min-width: 0; min-height: 20px; text-align: center; font-size: 13px; line-height: 1.5; color: #a29c94; }
+.tal-portrait-link { display: block; width: 40px; height: 40px; flex: none; border-radius: 3px; }
 .tal-portrait-link:focus-visible { outline: 2px solid #d6b383; outline-offset: 3px; }
-.tal-portrait { display: block; width: 44px; height: 44px; object-fit: cover; border: 1px solid #55504a; border-radius: 3px; }
-.message-copy { min-width: 0; flex: 1; text-align: center; }
+.tal-portrait { display: block; width: 40px; height: 40px; object-fit: cover; border: 1px solid #55504a; border-radius: 3px; }
 .board-messages p { margin: 0; }
 #result { color: #d6b383; }
 #draw-actions { margin-top: 8px; }
-.history { position: relative; flex: 1; min-height: 0; height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #5e574e transparent; padding-top: 8px; }
-.move-row { display: grid; grid-template-columns: 32px 1fr 1fr; align-items: center; min-height: 34px; font-size: 13px; }
-.move-number { color: #a29c94; font-size: 11px; }
-.move { padding: 7px 8px; border: 0; background: transparent; text-align: left; border-radius: 3px; font-variant-numeric: tabular-nums; }
-.move.current { background: #554735; color: #f0d7b2; font-weight: 600; }
-.move.future { opacity: .35; }
 #error { font-size: 13px; line-height: 1.5; color: #f0a38d; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 dialog { color: #e4e2df; background: #2e2e2e; border: 1px solid #55504a; border-radius: 6px; padding: 24px; max-width: calc(100vw - 32px); }
@@ -72,6 +64,5 @@ dialog h2 { margin-bottom: 20px; }
 @media (max-width: 800px) {
   .header { padding: 18px 16px; max-width: 560px; }
   h1 { font-size: 30px; }
-  main { grid-template-columns: minmax(0, 1fr); padding: 0 16px; gap: 20px; max-width: 560px; }
-  .history { flex: none; height: 200px; }
+  main { padding: 0 16px; max-width: 560px; }
 }

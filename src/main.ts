@@ -15,7 +15,12 @@ import './style.css';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <header class="header">
-    <h1>talbot</h1>
+    <div class="brand">
+      <a class="tal-portrait-link" href="https://commons.wikimedia.org/wiki/File:Mikhail_Tal_1982.jpg" target="_blank" rel="noopener noreferrer" aria-label="Mikhail Tal portrait source and license" title="Mikhail Tal, 1982 · Rob C. Croes / Anefo · CC BY-SA 3.0 NL">
+        <img class="tal-portrait" src="${talPortrait}" width="40" height="40" alt="Mikhail Tal in 1982">
+      </a>
+      <h1>talbot</h1>
+    </div>
     <div class="header-tools">
     <button id="sound" class="icon-button" aria-label="Move sounds" aria-pressed="true" title="Mute">${icons.mute}</button>
     <a id="version" class="version" href="https://github.com/pathikrit/talbot/commit/${__GIT_SHA__}" target="_blank" rel="noopener noreferrer" aria-label="View running commit ${__GIT_SHA__.slice(0, 7)}" ${__GIT_SHA__ ? '' : 'hidden'}>${__GIT_SHA__.slice(0, 7)}</a>
@@ -24,39 +29,29 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <main>
     <section class="board-area" aria-label="Chess game">
       <div class="board-messages">
-        <a class="tal-portrait-link" href="https://commons.wikimedia.org/wiki/File:Mikhail_Tal_1982.jpg" target="_blank" rel="noopener noreferrer" aria-label="Mikhail Tal portrait source and license" title="Mikhail Tal, 1982 · Rob C. Croes / Anefo · CC BY-SA 3.0 NL">
-          <img class="tal-portrait" src="${talPortrait}" width="44" height="44" alt="Mikhail Tal in 1982">
-        </a>
-        <div class="message-copy">
-          <p id="status" role="status" aria-live="polite">Loading Patricia…</p>
-          <p id="result" aria-live="polite" hidden></p>
-          <p id="error" role="alert" hidden></p>
-          <div id="draw-actions" hidden><button id="accept-draw">Accept draw</button> <button id="decline-draw">Decline draw</button></div>
-        </div>
+        <p id="status" role="status" aria-live="polite">Loading Patricia…</p>
+        <p id="result" aria-live="polite" hidden></p>
+        <p id="error" role="alert" hidden></p>
+        <div id="draw-actions" hidden><button id="accept-draw">Accept draw</button> <button id="decline-draw">Decline draw</button></div>
       </div>
       <div class="board-layout">
         <div id="eval-bar" class="eval-bar" role="meter" aria-label="Patricia evaluation, White's perspective" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" title="Patricia evaluation · White's perspective">
           <div id="eval-white" class="eval-white"></div><span id="eval-score">—</span>
         </div>
+        <div class="board-frame"><div id="board" aria-label="Chessboard. Drag or click pieces to move."></div></div>
         <div class="captures" aria-label="Captured pieces">
           <div id="white-captures" class="captured-pieces cg-wrap" aria-label="Captured by White"></div>
           <div id="black-captures" class="captured-pieces cg-wrap" aria-label="Captured by Black"></div>
           <div id="material" class="material" title="Material only: pawn 1 · knight/bishop 3 · rook 5 · queen 9"><span id="material-side">Even</span><strong id="material-score"></strong></div>
         </div>
-        <div class="board-frame"><div id="board" aria-label="Chessboard. Drag or click pieces to move."></div></div>
       </div>
-    </section>
-    <section class="moves-panel" aria-label="Move history">
-      <div class="moves-header">
-        <nav class="history-controls" aria-label="Game controls">
-          <button id="new-game">New game</button>
-          <button id="draw">Offer draw</button>
-          <button id="swap" class="icon-button" aria-label="Swap sides" title="Swap Sides">${icons.swap}</button>
-          <button id="undo" class="icon-button" aria-label="Undo" aria-keyshortcuts="ArrowLeft" title="Undo Move">${icons.undo}</button>
-          <button id="redo" class="icon-button" aria-label="Redo" aria-keyshortcuts="ArrowRight" title="Redo Move">${icons.redo}</button>
-        </nav>
-      </div>
-      <div id="history" class="history"></div>
+      <nav class="game-controls" aria-label="Game controls">
+        <button id="new-game">New game</button>
+        <button id="draw">Offer draw</button>
+        <button id="swap" class="icon-button" aria-label="Swap sides" title="Swap Sides">${icons.swap}</button>
+        <button id="undo" class="icon-button" aria-label="Undo" aria-keyshortcuts="ArrowLeft" title="Undo Move">${icons.undo}</button>
+        <button id="redo" class="icon-button" aria-label="Redo" aria-keyshortcuts="ArrowRight" title="Redo Move">${icons.redo}</button>
+      </nav>
     </section>
   </main>
   <dialog id="promotion"><form method="dialog"><h2>Promote pawn</h2><div class="promotion-options"><button value="q">Queen</button><button value="r">Rook</button><button value="b">Bishop</button><button value="n">Knight</button></div><button value="cancel" class="promotion-cancel">Cancel</button></form></dialog>
@@ -79,7 +74,7 @@ element('sound').addEventListener('click', () => {
   element('sound').title = sounds.enabled ? 'Mute' : 'UnMute';
 });
 const game = controller.game;
-let renderedHistory = '';
+let renderedMaterial = '';
 let renderedBoard = '';
 let pendingPromotion: { from: Key; to: Key; revision: number } | undefined;
 const promotion = element<HTMLDialogElement>('promotion');
@@ -177,9 +172,9 @@ function render(): void {
   element('result').textContent = result ? result[0].toUpperCase() + result.slice(1) : '';
   element('status').classList.toggle('sr-only', !!result || !!controller.error);
   element('draw-actions').hidden = controller.drawOffer !== 'engine';
-  const historyKey = `${game.cursor}:${game.history.map(move => move.san).join(' ')}`;
-  if (historyKey !== renderedHistory) {
-    renderedHistory = historyKey;
+  const materialKey = `${game.cursor}:${game.history.map(move => move.san).join(' ')}`;
+  if (materialKey !== renderedMaterial) {
+    renderedMaterial = materialKey;
     const roles = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king' };
     const captures = { w: game.captures('w'), b: game.captures('b') };
     const material = game.materialDifference;
@@ -211,35 +206,6 @@ function render(): void {
         }
       }
     }
-    const history = element('history');
-    history.replaceChildren();
-    for (let i = 0; i < game.history.length; i += 2) {
-      const row = document.createElement('div');
-      row.className = 'move-row';
-      const number = document.createElement('span');
-      number.className = 'move-number';
-      number.textContent = `${i / 2 + 1}.`;
-      row.append(number);
-      for (const index of [i, i + 1]) {
-        const move = game.history[index];
-        const cell = document.createElement(move ? 'button' : 'span');
-        cell.className = `move${index >= game.cursor ? ' future' : ''}${index === game.cursor - 1 ? ' current' : ''}`;
-        cell.textContent = move?.san ?? '';
-        if (move) {
-          cell.title = `Return to position after ${Math.floor(index / 2) + 1}${move.color === 'w' ? '.' : '…'} ${move.san}`;
-          cell.setAttribute('aria-current', String(index === game.cursor - 1));
-          cell.addEventListener('click', () => {
-            pendingPromotion = undefined;
-            if (promotion.open) promotion.close();
-            controller.seek(index + 1);
-          });
-        }
-        row.append(cell);
-      }
-      history.append(row);
-    }
-    const current = history.querySelector<HTMLElement>('.current');
-    if (current) history.scrollTop = current.offsetTop - history.clientHeight / 2;
   }
 }
 

@@ -94,7 +94,7 @@ test('agrees a draw, preserves the result across swapping, and undoes into play'
   await expect(page.locator('#result')).toBeHidden();
 });
 
-test('loads at a repository subpath, plays on the board, replies in one second, and replays a turn', async ({ page }, testInfo) => {
+test('loads at a repository subpath, plays on the board, and replies in one second', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await ready(page);
@@ -102,17 +102,11 @@ test('loads at a repository subpath, plays on the board, replies in one second, 
   await move(page, 'e2', 'e4');
   const started = Date.now();
   await expect(page.getByRole('status')).toHaveText('Talbot is thinking');
-  await expect(page.locator('.move:not(.future)')).toHaveCount(2);
   await humanTurn(page, 2500);
   const elapsed = Date.now() - started;
   expect(elapsed).toBeGreaterThan(800);
   expect(elapsed).toBeLessThan(2000);
   const afterReply = await fen(page);
-  await page.locator('#history button.move').first().click();
-  expect(new Chess(await fen(page)).turn()).toBe('b');
-  await expect(page.locator('#board')).toHaveAttribute('data-mode', 'thinking');
-  await page.locator('#history button.move').nth(1).click();
-  expect(await fen(page)).toBe(afterReply);
   const chess = new Chess(afterReply);
   expect(chess.turn()).toBe('w');
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
@@ -239,7 +233,7 @@ test('has no horizontal overflow at the project viewport', async ({ page }) => {
   expect(Math.abs(bounds.width - bounds.height)).toBeLessThan(1);
 });
 
-test('keeps the board fluid and stacks the compact move panel on smaller screens', async ({ page }) => {
+test('keeps the board fluid with side rails and centered controls', async ({ page }) => {
   await ready(page);
   for (const width of [320, 390, 600, 768, 820, 1280]) {
     await page.setViewportSize({ width, height: 900 });
@@ -247,17 +241,19 @@ test('keeps the board fluid and stacks the compact move panel on smaller screens
     await expect.poll(() => page.evaluate(() => ({ inner: innerWidth, scroll: document.documentElement.scrollWidth })))
       .toEqual({ inner: width, scroll: width });
     const board = (await page.locator('#board').boundingBox())!;
-    const panel = (await page.locator('.moves-panel').boundingBox())!;
+    const bar = (await page.locator('#eval-bar').boundingBox())!;
+    const captures = (await page.locator('.captures').boundingBox())!;
     const messages = (await page.locator('.board-messages').boundingBox())!;
+    const controlsBox = (await page.locator('.game-controls').boundingBox())!;
     expect(messages.y + messages.height).toBeLessThan(board.y);
+    expect(bar.x + bar.width).toBeLessThan(board.x);
+    expect(captures.x).toBeGreaterThan(board.x + board.width);
+    expect(controlsBox.y).toBeGreaterThan(board.y + board.height);
+    expect(Math.abs(controlsBox.x + controlsBox.width / 2 - width / 2)).toBeLessThan(1);
     expect(Math.abs(board.width - board.height)).toBeLessThan(1);
-    expect(panel.width).toBeLessThanOrEqual(240);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    if (width <= 800) {
-      expect(panel.y).toBeGreaterThan(messages.y + messages.height);
-      expect(Math.abs(panel.x + panel.width / 2 - width / 2)).toBeLessThan(1);
-    } else expect(panel.x).toBeGreaterThan(board.x + board.width);
-    const controls = await page.locator('.history-controls button').all();
+    const controls = await page.locator('.game-controls button').all();
+    expect(controls).toHaveLength(5);
     const top = (await controls[0].boundingBox())!.y;
     for (const control of controls) expect((await control.boundingBox())!.y).toBe(top);
   }
@@ -322,7 +318,7 @@ test('shows only the compact game interface', async ({ page }) => {
   await ready(page);
   await expect(page).toHaveTitle('talbot');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('talbot');
-  await expect(page.locator('.moves-panel h2')).toHaveCount(0);
+  await expect(page.locator('.moves-panel, #history, .move-row')).toHaveCount(0);
   await expect(page.locator('#material')).toHaveAttribute('aria-label', 'Material is equal');
   await expect(page.getByRole('button', { name: 'Undo', exact: true })).toBeVisible();
   for (const name of ['Undo', 'Redo']) {
@@ -338,8 +334,11 @@ test('shows only the compact game interface', async ({ page }) => {
   await expect(portrait).toHaveAttribute('src', /assets\/mikhail-tal-1982-[^/]+\.jpg$/);
   await expect(page.locator('.tal-portrait-link')).toHaveAttribute('href', 'https://commons.wikimedia.org/wiki/File:Mikhail_Tal_1982.jpg');
   const portraitBox = (await portrait.boundingBox())!;
-  expect(portraitBox.width).toBe(44);
-  expect(portraitBox.height).toBe(44);
+  const headingBox = (await page.getByRole('heading', { level: 1 }).boundingBox())!;
+  expect(portraitBox.width).toBe(40);
+  expect(portraitBox.height).toBe(40);
+  expect(portraitBox.x + portraitBox.width).toBeLessThan(headingBox.x);
+  expect(Math.abs(portraitBox.y + portraitBox.height / 2 - headingBox.y - headingBox.height / 2)).toBeLessThan(1);
   await expect(page.locator('#eval-score')).not.toHaveText('—');
   const bar = (await page.locator('#eval-bar').boundingBox())!;
   const board = (await page.locator('#board').boundingBox())!;
@@ -347,12 +346,14 @@ test('shows only the compact game interface', async ({ page }) => {
   expect(messages.y + messages.height).toBeLessThan(board.y);
   expect(bar.x + bar.width).toBeLessThan(board.x);
   const captures = (await page.locator('.captures').boundingBox())!;
-  expect(captures.x).toBeGreaterThan(bar.x + bar.width);
-  expect(captures.x + captures.width).toBeLessThan(board.x);
-  await expect(page.locator('.history-controls button')).toHaveText(['New game', 'Offer draw', '', '', '']);
+  expect(captures.x).toBeGreaterThan(board.x + board.width);
+  const controlsBox = (await page.locator('.game-controls').boundingBox())!;
+  expect(controlsBox.y).toBeGreaterThan(board.y + board.height);
+  expect(Math.abs(controlsBox.x + controlsBox.width / 2 - page.viewportSize()!.width / 2)).toBeLessThan(1);
+  await expect(page.locator('.game-controls button')).toHaveText(['New game', 'Offer draw', '', '', '']);
   await expect(page.locator('#swap')).toHaveAttribute('title', 'Swap Sides');
   await expect(page.locator('#sound')).toHaveAttribute('title', 'Mute');
-  await expect(page.locator('.history-controls svg')).toHaveCount(3);
+  await expect(page.locator('.game-controls svg')).toHaveCount(3);
   await expect(page.locator('#draw')).toBeDisabled();
   await expect(page.locator('#resume')).toHaveCount(0);
   await expect(page.locator('#version')).toHaveText(/^[a-f0-9]{7}$/);
@@ -362,10 +363,7 @@ test('shows only the compact game interface', async ({ page }) => {
   await expect(whiteSlots).toHaveCount(0);
   await expect(blackSlots).toHaveCount(0);
   await expect(page.locator('footer, .intro, .status-card, .player-row, details, #move-form')).toHaveCount(0);
-  const box = await page.locator('#history').boundingBox();
-  expect(box!.height).toBeGreaterThan(150);
-  expect(box!.width).toBeLessThanOrEqual(240);
-  const controls = await page.locator('.history-controls button').all();
+  const controls = await page.locator('.game-controls button').all();
   const top = (await controls[0].boundingBox())!.y;
   for (const control of controls) expect((await control.boundingBox())!.y).toBe(top);
 });
