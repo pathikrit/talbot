@@ -90,8 +90,8 @@ async function drain(): Promise<void> {
         if (!focused.bestmove || active !== job || pending || resetPending) continue;
         const book = broadBook && openingBook.choose(position, job.position, focused.candidates,
           focused.bestmove, broadBook.lineId);
-        const styled = book?.analysis ?? chooseSacrifice(position.fen(), focused.candidates, focused.bestmove,
-          performance.now() + Math.max(0, Math.min(80, job.deadline - now() - 5)));
+        const styled = chooseSacrifice(position.fen(), focused.candidates, focused.bestmove,
+          performance.now() + Math.max(0, Math.min(80, job.deadline - now() - 5)), book?.analysis.pv[0]);
         const proposed = styled ?? focused.candidates.complete.find(info => info.pv[0] === focused.bestmove);
         const drawSafe = proposed && avoidDraw(position, focused.candidates, proposed);
         const selected = drawSafe && (styled || drawSafe.pv[0] !== focused.bestmove) ? drawSafe : undefined;

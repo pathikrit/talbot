@@ -209,14 +209,17 @@ a plan that was not played.
 
 ### Opening repertoire
 
-`book/opening-book.json` is a checked-in, offline-compiled book: 486 legal lines
-in 26 explicitly side-tagged families, with gambits/traps weighted above ordinary
-openings. It includes Alien, Evans, King's, Queen's, Stafford, and named traps.
+`book/opening-book.json` is the sole runtime opening book: 471 legal lines
+in 22 explicitly side-tagged families, compiled offline from the pinned Lichess
+and permitted eco.json records. Only source names containing "gambit" or "trap"
+(case-insensitive, including countergambits) qualify, and they must also match
+the reviewed family allowlist. Ordinary opening families are excluded. It
+includes Alien, Evans, King's, Queen's, Stafford, and named traps.
 The initial draw selects a distinct move weighted by its highest-weight compatible
 family, then a weighted family within that move, then a line. Summing family
 weights per move would let the many e4/...e5 families crowd out other responses.
-Duplicate records do not increase family probability; gambit/trap moves still
-have a higher weight than ordinary openings. This applies to both colors.
+Duplicate records do not increase family probability; the configured weights
+apply only among eligible gambit/trap families. This applies to both colors.
 Choose once, on the first available engine turn within the first four plies.
 After that, follow that exact line, not a new random branch every move. Compatible
 same-position transpositions are supported without rewinding along the line.
@@ -225,8 +228,15 @@ Book choices require the same complete, depth >= 4, common-depth MultiPV batch
 and configured cp allowance as the sacrifice selector. No mate-score override,
 unsearched move, or forced unsound gambit. On a deviation, line end, missing
 candidate, or failed evaluation guard, permanently leave the book on that branch
-and use largest-sacrifice selection, then Patricia's best move. A book line is
-preferred to other sacrifices while it qualifies, including preparatory moves.
+and use largest-sacrifice selection, then Patricia's best move. A qualifying
+book line is a preference, including preparatory moves, rather than an override
+of sacrifice selection. Probe its PV first, then compare all eligible candidates
+within the same 80ms / 1500-node budget. A larger verified net investment overrides
+the book; equal positive investments favor better evaluation, with exact ties
+retaining the book. Without a verified alternative, keep the qualifying book move.
+All candidates still require the configured loss allowance relative to the best
+searched score. If another move wins selection, retire the book plan on that
+branch; return that move's own analysis/PV. Draw avoidance still has final say.
 Opening lookup is worker-only and local; normal engine thinking and pondering
 continue even in book positions. Speculative searches never choose a book line.
 
@@ -278,6 +288,11 @@ The upstream commit is pinned to
 `f1ee4273c6e6068bd6ec0d53ca91c1c391543f85` (Patricia 5.1). Bootstrap checks the
 source archive's SHA-256. The original downloaded source is left untouched in
 `vendor/`; mechanical patches are applied to `.build/patricia` during compilation.
+Bootstrap replaces missing or checksum-invalid cached archives, downloading to
+a temporary file and checking the pinned SHA-256 before promoting it to the cache.
+Interrupted downloads therefore cannot become reusable cached sources.
+Use HTTP/1.1 for the archive transfer; an HTTP/2 download locally returned a
+truncated gzip while curl reported success. Never relax the checksum check.
 
 The adapter bypasses native UCI input and thread creation. Portable aligned
 arrays embed the networks; tablebases are disabled; a 32 MB-compatible

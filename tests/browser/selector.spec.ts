@@ -97,7 +97,7 @@ test('the production worker avoids an immediate repetition within the configured
   expect(response.selected?.score.value).toBe(19);
 });
 
-test('bundled book follows a committed opening but falls back on deviation or excessive loss', async ({ page }) => {
+test('bundled book follows its plan, falls back when invalid, and retires it for a verified sacrifice', async ({ page }) => {
   const lineId = openingData.lines.find(line => line.family === 'evans')!.id;
   await page.route('**/harness.html', route => route.fulfill({ contentType: 'text/html', body: '<title>Book test</title>' }));
   await page.route('**/fixture/patricia.js', route => route.fulfill({ contentType: 'text/javascript', body: `
@@ -109,6 +109,7 @@ test('bundled book follows a committed opening but falls back on deviation or ex
           if (name === 'talbot_search') search++;
           print('info depth 7 multipv 1 score cp 40 pv b1c3');
           print('info depth 7 multipv 2 score cp ' + (search === 3 ? -36 : 0) + ' pv g1f3');
+          if (search === 4) print('info depth 7 multipv 3 score cp 0 pv f2f4 e5f4 g1f3 d7d6');
           print('bestmove b1c3');
           return Promise.resolve();
         }
@@ -123,7 +124,7 @@ test('bundled book follows a committed opening but falls back on deviation or ex
         const replies: { move: string; opening: string | null }[] = [];
         const timer = setTimeout(() => reject(new Error('Book worker timed out')), 5000);
         const search = () => worker.postMessage({
-          type: 'search', id: replies.length + 1, multipv: 2, opening: line,
+          type: 'search', id: replies.length + 1, multipv: replies.length === 3 ? 3 : 2, opening: line,
           position: { fen, moves: ['e2e4', replies.length === 1 ? 'c7c5' : 'e7e5'] },
           deadline: performance.timeOrigin + performance.now() + 1000,
         });
@@ -132,7 +133,7 @@ test('bundled book follows a committed opening but falls back on deviation or ex
           if (data.type === 'ready') search();
           if (data.type === 'bestmove') {
             replies.push(data);
-            if (replies.length === 3) { clearTimeout(timer); resolve(replies); }
+            if (replies.length === 4) { clearTimeout(timer); resolve(replies); }
             else search();
           }
           if (data.type === 'error') { clearTimeout(timer); reject(new Error(data.message)); }
@@ -144,4 +145,6 @@ test('bundled book follows a committed opening but falls back on deviation or ex
   expect(responses[0]).toMatchObject({ move: 'g1f3', opening: lineId });
   expect(responses[1]).toMatchObject({ move: 'b1c3', opening: null });
   expect(responses[2]).toMatchObject({ move: 'b1c3', opening: null });
+  expect(responses[3]).toMatchObject({ move: 'f2f4', opening: null,
+    selected: { depth: 7, score: { kind: 'cp', value: 0 }, pv: ['f2f4', 'e5f4', 'g1f3', 'd7d6'] } });
 });

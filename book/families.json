@@ -22,8 +22,5 @@
   { "id": "noahs-ark", "side": "b", "weight": 5, "pattern": "Noah's Ark Trap" },
   { "id": "mortimer", "side": "b", "weight": 5, "pattern": "Mortimer Trap" },
   { "id": "lasker-trap", "side": "b", "weight": 5, "pattern": "Albin.*Lasker Trap" },
-  { "id": "legal-trap", "side": "w", "weight": 5, "pattern": "L.gal (Trap|Mate)" },
-  { "id": "italian", "side": "w", "weight": 1, "pattern": "^Italian Game: (Classical Variation|Giuoco Pianissimo)$" },
-  { "id": "sicilian", "side": "b", "weight": 1, "pattern": "^Sicilian Defense: (Dragon Variation|Najdorf Variation)$" },
-  { "id": "french", "side": "b", "weight": 1, "pattern": "^French Defense: (Classical Variation|Winawer Variation)$" }
+  { "id": "legal-trap", "side": "w", "weight": 5, "pattern": "L.gal (Trap|Mate)" }
 ]

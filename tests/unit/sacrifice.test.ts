@@ -52,6 +52,36 @@ describe('lasting material offers', () => {
 });
 
 describe('candidate ranking', () => {
+  it('keeps quiet book preparation unless a verified sacrifice qualifies', () => {
+    const set = new CandidateSet(2);
+    set.add(info(1, 'h1g1', 50));
+    set.add(info(2, 'h1h2', 20));
+    expect(chooseSacrifice(pawnOffer, set, 'h1g1', Infinity, 'h1h2')?.pv[0]).toBe('h1h2');
+    set.add(info(1, 'e3e4', 50, 8));
+    set.add(info(2, 'h1h2', 20, 8));
+    expect(chooseSacrifice(pawnOffer, set, 'e3e4', Infinity, 'h1h2')?.pv[0]).toBe('e3e4');
+    expect(chooseSacrifice(pawnOffer, set, 'e3e4', 0, 'h1h2')?.pv[0]).toBe('h1h2');
+  });
+  it('compares the book investment and overrides only for size or a better equal-size score', () => {
+    const fen = 'k7/8/8/p7/3p4/8/1P4N1/7K w - - 0 1';
+    const set = new CandidateSet(3);
+    set.add(info(1, 'h1g1', 50));
+    set.add(info(2, 'b2b4 a8b8', 40));
+    set.add(info(3, 'g2e3 a8b8', 50 - settings.maxSacrificeLossCp));
+    expect(chooseSacrifice(fen, set, 'h1g1', Infinity, 'b2b4')?.pv[0]).toBe('g2e3');
+    expect(chooseSacrifice(fen, set, 'h1g1', Infinity, 'g2e3')?.pv[0]).toBe('g2e3');
+    set.add(info(1, 'h1g1', 50, 8));
+    set.add(info(2, 'b2b4 a8b8', 40, 8));
+    set.add(info(3, 'g2e3 a8b8', 49 - settings.maxSacrificeLossCp, 8));
+    expect(chooseSacrifice(fen, set, 'h1g1', Infinity, 'b2b4')?.pv[0]).toBe('b2b4');
+
+    const equal = new CandidateSet(2);
+    const pawns = 'k7/8/8/3p1p2/8/4P1P1/8/7K w - - 0 1';
+    equal.add(info(1, 'e3e4', 30)); equal.add(info(2, 'g3g4', 20));
+    expect(chooseSacrifice(pawns, equal, 'e3e4', Infinity, 'g3g4')?.pv[0]).toBe('e3e4');
+    equal.add(info(1, 'e3e4', 30, 8)); equal.add(info(2, 'g3g4', 30, 8));
+    expect(chooseSacrifice(pawns, equal, 'e3e4', Infinity, 'g3g4')?.pv[0]).toBe('g3g4');
+  });
   it('avoids a threefold repetition for no more than the configured cp loss', () => {
     const chess = new Chess();
     ['g1f3', 'g8f6', 'f3g1', 'f6g8', 'g1f3', 'g8f6', 'f3g1'].forEach(move => chess.move(move));

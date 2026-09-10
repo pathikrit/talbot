@@ -43,6 +43,12 @@ function position(moves: string[] = []) {
 }
 
 describe('compiled book', () => {
+  it('contains only named gambits and traps, with no ordinary opening families', () => {
+    for (const line of data.lines) expect(line.name).toMatch(/gambit|trap/i);
+    for (const id of ['italian', 'sicilian', 'french']) {
+      expect(data.families.some(family => family.id === id)).toBe(false);
+    }
+  });
   it('contains legal, position-indexed lines with explicit playing sides', () => {
     expect(data.lines.length).toBeGreaterThan(100);
     expect(new Set(data.lines.map(line => line.id)).size).toBe(data.lines.length);
@@ -76,7 +82,7 @@ describe('initial random choice then committed repertoire', () => {
     }
     expect(counts).toEqual({ kings: 4, queens: 5, italian: 1 });
   });
-  it('does not let many Black gambits sharing e5 crowd out other book replies', () => {
+  it('selects only gambit/trap book replies even when ordinary alternatives are searched', () => {
     const { chess, request } = position(['e2e4']);
     const set = candidates(['e7e5', 'c7c5', 'e7e6']);
     const book = new OpeningBook(data);
@@ -88,9 +94,8 @@ describe('initial random choice then committed repertoire', () => {
       counts[move] = (counts[move] ?? 0) + 1;
       expect(data.families.find(f => f.id === data.lines.find(l => l.id === chosen.lineId)!.family)!.side).toBe('b');
     }
-    // Trap weight 5 versus ordinary Sicilian/French weight 1 each, regardless
-    // of how many different e5 families/variations the source contains.
-    expect(counts).toEqual({ e7e5: 50, c7c5: 10, e7e6: 10 });
+    expect(counts).toEqual({ e7e5: 70 });
+    expect(book.choose(chess, request, candidates(['c7c5', 'e7e6']), 'c7c5')).toBeUndefined();
   });
   it('downweights a recently repeated move, family and exact line', () => {
     const book = new OpeningBook(fixture());
