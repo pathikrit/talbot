@@ -9,5 +9,6 @@ for (const [from, name] of [
   ['book/licenses/lichess.txt', 'OPENINGS-LICHESS-CC0.txt'],
   ['book/licenses/eco.txt', 'OPENINGS-ECO-MIT.txt'],
   ['src/assets/sound/NOTICE.txt', 'CHESS-SOUNDS-NOTICE.txt'],
+  ['src/assets/tal/NOTICE.txt', 'MIKHAIL-TAL-PHOTO-NOTICE.txt'],
   ['node_modules/@fortawesome/free-solid-svg-icons/LICENSE.txt', 'FONT-AWESOME-LICENSE.txt'],
 ]) cpSync(from, `public/licenses/${name}`);

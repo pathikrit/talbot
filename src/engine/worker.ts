@@ -19,6 +19,7 @@ let candidates: CandidateSet | undefined;
 let bestmove: string | undefined;
 const FINALIST_MULTIPV = 6;
 const BROAD_SEARCH_SHARE = 0.45;
+const pieceNames = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen' } as const;
 
 function stop(): void { engine?.ccall('talbot_stop', null, [], []); }
 function fail(error: unknown): void {
@@ -92,12 +93,19 @@ async function drain(): Promise<void> {
           focused.bestmove, broadBook.lineId);
         const styled = chooseSacrifice(position.fen(), focused.candidates, focused.bestmove,
           performance.now() + Math.max(0, Math.min(80, job.deadline - now() - 5)), book?.analysis.pv[0]);
-        const proposed = styled ?? focused.candidates.complete.find(info => info.pv[0] === focused.bestmove);
+        const proposed = styled?.analysis ?? focused.candidates.complete.find(info => info.pv[0] === focused.bestmove);
         const drawSafe = proposed && avoidDraw(position, focused.candidates, proposed);
         const selected = drawSafe && (styled || drawSafe.pv[0] !== focused.bestmove) ? drawSafe : undefined;
         const opening = book && drawSafe?.pv[0] === book.analysis.pv[0] ? book.lineId : null;
+        const decision = drawSafe ? {
+          opening: opening ? book?.name : undefined,
+          sacrifice: styled?.sacrifice && styled.analysis.pv[0] !== focused.bestmove
+            && drawSafe.pv[0] === styled.analysis.pv[0]
+            ? { piece: pieceNames[styled.sacrifice.piece], insteadOf: focused.bestmove }
+            : undefined,
+        } : undefined;
         send({ type: 'bestmove', id: job.id, move: drawSafe?.pv[0] ?? focused.bestmove,
-          selected, opening });
+          selected, opening, decision: decision?.opening || decision?.sacrifice ? decision : undefined });
       } finally { active = undefined; }
     }
   } catch (error) { fail(error); }

@@ -29,7 +29,7 @@ test('the staged production worker deepens and selects a future declined sacrifi
   const response = await page.evaluate(async asset => {
     const worker = new Worker(new URL(`assets/${asset}`, location.href), { type: 'module' });
     try {
-      return await new Promise<{ move: string; selected?: { depth: number; pv: string[]; score: { value: number } } }>((resolve, reject) => {
+      return await new Promise<{ move: string; selected?: { depth: number; pv: string[]; score: { value: number } }; decision?: unknown }>((resolve, reject) => {
         const timer = setTimeout(() => reject(new Error('Worker timed out')), 3000);
         worker.onerror = error => { clearTimeout(timer); reject(new Error(error.message)); };
         worker.onmessage = ({ data }) => {
@@ -49,6 +49,7 @@ test('the staged production worker deepens and selects a future declined sacrifi
   expect(response.selected?.pv).toEqual(['h1g1', 'a8b8', 'e3e4', 'b8a8']);
   expect(response.selected?.score.value).toBe(0);
   expect(response.selected?.depth).toBe(8);
+  expect(response.decision).toEqual({ sacrifice: { piece: 'pawn', insteadOf: 'h1h2' } });
 });
 
 test('the production worker avoids an immediate repetition within the configured 1cp', async ({ page }) => {
@@ -120,8 +121,8 @@ test('bundled book follows its plan, falls back when invalid, and retires it for
   const responses = await page.evaluate(async ({ asset, line, fen }) => {
     const worker = new Worker(new URL(`assets/${asset}`, location.href), { type: 'module' });
     try {
-      return await new Promise<{ move: string; opening: string | null }[]>((resolve, reject) => {
-        const replies: { move: string; opening: string | null }[] = [];
+      return await new Promise<{ move: string; opening: string | null; decision?: unknown }[]>((resolve, reject) => {
+        const replies: { move: string; opening: string | null; decision?: unknown }[] = [];
         const timer = setTimeout(() => reject(new Error('Book worker timed out')), 5000);
         const search = () => worker.postMessage({
           type: 'search', id: replies.length + 1, multipv: replies.length === 3 ? 3 : 2, opening: line,
@@ -142,9 +143,11 @@ test('bundled book follows its plan, falls back when invalid, and retires it for
       });
     } finally { worker.terminate(); }
   }, { asset: workerAsset, line: lineId, fen: DEFAULT_POSITION });
-  expect(responses[0]).toMatchObject({ move: 'g1f3', opening: lineId });
+  expect(responses[0]).toMatchObject({ move: 'g1f3', opening: lineId,
+    decision: { opening: 'Evans Gambit' } });
   expect(responses[1]).toMatchObject({ move: 'b1c3', opening: null });
   expect(responses[2]).toMatchObject({ move: 'b1c3', opening: null });
   expect(responses[3]).toMatchObject({ move: 'f2f4', opening: null,
-    selected: { depth: 7, score: { kind: 'cp', value: 0 }, pv: ['f2f4', 'e5f4', 'g1f3', 'd7d6'] } });
+    selected: { depth: 7, score: { kind: 'cp', value: 0 }, pv: ['f2f4', 'e5f4', 'g1f3', 'd7d6'] },
+    decision: { sacrifice: { piece: 'pawn', insteadOf: 'b1c3' } } });
 });

@@ -103,7 +103,7 @@ const positionIds = new Map(positions.map((fen, id) => [fen, id]));
 const used = new Set(lines.map(line => line.family));
 const book = {
   version: 1,
-  families: families.filter(f => used.has(f.id)).map(({ id, side, weight }) => ({ id, side, weight })),
+  families: families.filter(f => used.has(f.id)).map(({ id, side, weight, label }) => ({ id, side, weight, label })),
   positions,
   lines: lines.map(({ sources: attribution, positions: path, ...line }) => ({
     ...line, path: path.map(fen => positionIds.get(fen)),
@@ -111,7 +111,8 @@ const book = {
 };
 const report = {
   sources, inputs, excludedOrigins: [...excludedOrigins].sort(), rejected,
-  families: families.map(f => ({ id: f.id, side: f.side, lines: lines.filter(line => line.family === f.id).length })),
+  families: families.map(f => ({ id: f.id, label: f.label, side: f.side,
+    lines: lines.filter(line => line.family === f.id).length })),
   attribution: lines.map(({ id, sources }) => ({ id, sources })),
 };
 for (const [file, data] of [['book/opening-book.json', JSON.stringify(book) + '\n'],

@@ -16,7 +16,7 @@ function fixture(): BookData {
   ] as const;
   return {
     positions,
-    families: entries.map(([id, side, weight]) => ({ id, side, weight })),
+    families: entries.map(([id, side, weight]) => ({ id, side, weight, label: id })),
     lines: entries.map(([id, , , sequence]) => {
       const chess = new Chess();
       const moves = sequence.split(' ');
@@ -61,6 +61,7 @@ describe('compiled book', () => {
         chess.move(move);
       });
     }
+    for (const family of data.families) expect(family.label).toMatch(/(?:gambit|trap|attack)$/i);
     for (const id of ['alien', 'evans', 'kings', 'queens', 'stafford', 'mortimer', 'noahs-ark']) {
       expect(data.families.some(family => family.id === id)).toBe(true);
     }

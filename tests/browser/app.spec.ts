@@ -20,6 +20,9 @@ async function move(page: Page, from: string, to: string): Promise<void> {
   await board.click({ position: coordinate(to) });
 }
 async function fen(page: Page): Promise<string> { return (await page.locator('#board').getAttribute('data-fen'))!; }
+async function humanTurn(page: Page, timeout = 5000): Promise<void> {
+  await expect(page.locator('#board')).toHaveAttribute('data-mode', 'pondering', { timeout });
+}
 
 test('plays move sounds after interaction and stays silent when muted or navigating history', async ({ page }) => {
   await page.addInitScript(() => {
@@ -46,7 +49,7 @@ test('plays move sounds after interaction and stays silent when muted or navigat
   await ready(page);
   await expect(page.locator('html')).not.toHaveAttribute('data-sound-count', /.+/);
   await move(page, 'e2', 'e4');
-  await expect(page.getByRole('status')).toHaveText('Your move');
+  await humanTurn(page);
   await expect(page.locator('html')).toHaveAttribute('data-sound-count', '2');
   await page.locator('#undo').click();
   await page.locator('#redo').click();
@@ -56,7 +59,7 @@ test('plays move sounds after interaction and stays silent when muted or navigat
   await expect(page.locator('#sound')).toHaveAttribute('title', 'UnMute');
   await page.locator('#undo').click();
   await move(page, 'd2', 'd4');
-  await expect(page.getByRole('status')).toHaveText('Your move');
+  await humanTurn(page);
   await expect(page.locator('html')).toHaveAttribute('data-sound-count', '2');
 });
 
@@ -80,8 +83,7 @@ test('agrees a draw, preserves the result across swapping, and undoes into play'
   await expect(page.locator('#result')).toHaveText('Draw by agreement');
   const resultBounds = (await page.locator('#result').boundingBox())!;
   const boardBounds = (await page.locator('#board').boundingBox())!;
-  expect(resultBounds.y).toBeGreaterThan(boardBounds.y + boardBounds.height);
-  expect(Math.abs(resultBounds.x + resultBounds.width / 2 - boardBounds.x - boardBounds.width / 2)).toBeLessThan(1);
+  expect(resultBounds.y + resultBounds.height).toBeLessThan(boardBounds.y);
   await expect(page.locator('#eval-score')).toHaveText('½–½');
   await expect(page.locator('#board')).toHaveAttribute('data-mode', 'idle');
   await expect(page.locator('#draw')).toBeDisabled();
@@ -101,7 +103,7 @@ test('loads at a repository subpath, plays on the board, replies in one second, 
   const started = Date.now();
   await expect(page.getByRole('status')).toHaveText('Talbot is thinking');
   await expect(page.locator('.move:not(.future)')).toHaveCount(2);
-  await expect(page.getByRole('status')).toHaveText('Your move', { timeout: 2500 });
+  await humanTurn(page, 2500);
   const elapsed = Date.now() - started;
   expect(elapsed).toBeGreaterThan(800);
   expect(elapsed).toBeLessThan(2000);
@@ -128,6 +130,41 @@ test('loads at a repository subpath, plays on the board, replies in one second, 
   await page.screenshot({ path: testInfo.outputPath('talbot.png'), fullPage: true });
 });
 
+test('shows committed opening, sacrifice, and Tal mate commentary', async ({ page }) => {
+  await page.addInitScript(() => {
+    class CommentaryOpponent {
+      onmessage?: (event: { data: unknown }) => void;
+      timed = 0;
+      postMessage(message: { type: string; id: number; deadline?: number }) {
+        const emit = (data: unknown) => setTimeout(() => this.onmessage?.({ data }), 0);
+        if (message.type === 'init') { emit({ type: 'ready' }); return; }
+        if (message.type !== 'search') return;
+        emit({ type: 'info', id: message.id, analysis: {
+          depth: 8, multipv: 1, score: { kind: 'cp', value: 0 }, nodes: 20, nps: 20, time: 1, pv: ['e2e4'],
+        } });
+        if (message.deadline === undefined) return;
+        const replies = [
+          { move: 'e7e5', opening: 'stafford', decision: { opening: 'Stafford Gambit' },
+            selected: { depth: 8, multipv: 1, score: { kind: 'cp', value: 0 }, nodes: 20, nps: 20, time: 1, pv: ['e7e5'] } },
+          { move: 'b8c6', decision: { sacrifice: { piece: 'rook', insteadOf: 'g8f6' } },
+            selected: { depth: 8, multipv: 2, score: { kind: 'cp', value: -20 }, nodes: 20, nps: 20, time: 1, pv: ['b8c6'] } },
+          { move: 'g8f6', selected: { depth: 8, multipv: 1, score: { kind: 'mate', value: 4 }, nodes: 20, nps: 20, time: 1, pv: ['g8f6'] } },
+        ];
+        emit({ type: 'bestmove', id: message.id, ...replies[this.timed++] });
+      }
+    }
+    window.Worker = CommentaryOpponent as unknown as typeof Worker;
+  });
+  await ready(page);
+  await expect(page.getByRole('status')).toHaveText('Your move');
+  await move(page, 'e2', 'e4');
+  await expect(page.getByRole('status')).toHaveText('Playing the Stafford Gambit!', { timeout: 2500 });
+  await move(page, 'g1', 'f3');
+  await expect(page.getByRole('status')).toHaveText('Sacking a rook instead of Nf6!', { timeout: 2500 });
+  await move(page, 'f1', 'c4');
+  await expect(page.getByRole('status')).toHaveText('Mate in 4!', { timeout: 2500 });
+});
+
 test('switches sides during search and cancels obsolete replies', async ({ page }) => {
   await ready(page);
   await move(page, 'e2', 'e4');
@@ -141,7 +178,8 @@ test('switches sides during search and cancels obsolete replies', async ({ page 
   await expect(page.locator('#board')).toHaveAttribute('data-mode', 'idle');
   await page.getByRole('button', { name: 'New game' }).click();
   // New game retains the chosen side, so Patricia now makes White's first move.
-  await expect(page.getByRole('status')).toHaveText('Your move', { timeout: 2500 });
+  await expect(page.getByRole('status')).toHaveText('I’ll start.');
+  await humanTurn(page, 2500);
   expect(new Chess(await fen(page)).turn()).toBe('b');
   expect((await fen(page)).split(' ')[5]).toBe('1');
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
@@ -156,7 +194,7 @@ test('keeps playing without a network after loading', async ({ page, context }) 
   await context.setOffline(true);
   await move(page, 'd2', 'd4');
   await expect(page.getByRole('status')).toHaveText('Talbot is thinking');
-  await expect(page.getByRole('status')).toHaveText('Your move', { timeout: 2500 });
+  await humanTurn(page, 2500);
   expect(new Chess(await fen(page)).turn()).toBe('w');
 });
 
@@ -167,7 +205,7 @@ test('shows an explicit engine loading failure', async ({ page }) => {
   await expect(page.getByRole('alert')).toBeVisible();
   const errorBounds = (await page.getByRole('alert').boundingBox())!;
   const boardBounds = (await page.locator('#board').boundingBox())!;
-  expect(errorBounds.y).toBeGreaterThan(boardBounds.y + boardBounds.height);
+  expect(errorBounds.y + errorBounds.height).toBeLessThan(boardBounds.y);
   await expect(page.locator('#board')).toHaveAttribute('data-mode', 'error');
 });
 
@@ -189,7 +227,7 @@ test('pauses a pending reply while hidden and starts a fresh reply on return', a
     document.dispatchEvent(new Event('visibilitychange'));
   });
   await expect(page.getByRole('status')).toHaveText('Talbot is thinking');
-  await expect(page.getByRole('status')).toHaveText('Your move', { timeout: 2500 });
+  await humanTurn(page, 2500);
   expect(new Chess(await fen(page)).turn()).toBe('w');
 });
 
@@ -211,6 +249,7 @@ test('keeps the board fluid and stacks the compact move panel on smaller screens
     const board = (await page.locator('#board').boundingBox())!;
     const panel = (await page.locator('.moves-panel').boundingBox())!;
     const messages = (await page.locator('.board-messages').boundingBox())!;
+    expect(messages.y + messages.height).toBeLessThan(board.y);
     expect(Math.abs(board.width - board.height)).toBeLessThan(1);
     expect(panel.width).toBeLessThanOrEqual(240);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -249,7 +288,7 @@ test('offers underpromotion and restores the board when promotion is cancelled',
   for (const [from, to] of [['a2', 'a4'], ['a4', 'a5'], ['a5', 'a6'], ['a6', 'b7']]) {
     await move(page, from, to);
     await expect(page.getByRole('status')).toHaveText('Talbot is thinking');
-    await expect(page.getByRole('status')).toHaveText('Your move');
+    await humanTurn(page);
   }
   const before = await fen(page);
   await expect(page.locator('#white-captures piece.black.pawn')).toHaveCount(1);
@@ -294,9 +333,18 @@ test('shows only the compact game interface', async ({ page }) => {
     await expect(button).toHaveAttribute('title', `${name} Move`);
   }
   await expect(page.getByRole('meter')).toBeVisible();
+  const portrait = page.locator('.tal-portrait');
+  await expect(portrait).toHaveAttribute('alt', 'Mikhail Tal in 1982');
+  await expect(portrait).toHaveAttribute('src', /assets\/mikhail-tal-1982-[^/]+\.jpg$/);
+  await expect(page.locator('.tal-portrait-link')).toHaveAttribute('href', 'https://commons.wikimedia.org/wiki/File:Mikhail_Tal_1982.jpg');
+  const portraitBox = (await portrait.boundingBox())!;
+  expect(portraitBox.width).toBe(44);
+  expect(portraitBox.height).toBe(44);
   await expect(page.locator('#eval-score')).not.toHaveText('—');
   const bar = (await page.locator('#eval-bar').boundingBox())!;
   const board = (await page.locator('#board').boundingBox())!;
+  const messages = (await page.locator('.board-messages').boundingBox())!;
+  expect(messages.y + messages.height).toBeLessThan(board.y);
   expect(bar.x + bar.width).toBeLessThan(board.x);
   const captures = (await page.locator('.captures').boundingBox())!;
   expect(captures.x).toBeGreaterThan(bar.x + bar.width);

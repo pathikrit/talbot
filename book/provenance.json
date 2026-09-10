@@ -105,121 +105,145 @@
   "families": [
     {
       "id": "alien",
+      "label": "Alien Gambit",
       "side": "w",
       "lines": 1
     },
     {
       "id": "evans",
+      "label": "Evans Gambit",
       "side": "w",
       "lines": 27
     },
     {
       "id": "kings",
+      "label": "King's Gambit",
       "side": "w",
       "lines": 103
     },
     {
       "id": "queens",
+      "label": "Queen's Gambit",
       "side": "w",
       "lines": 154
     },
     {
       "id": "danish",
+      "label": "Danish Gambit",
       "side": "w",
       "lines": 6
     },
     {
       "id": "scotch",
+      "label": "Scotch Gambit",
       "side": "w",
       "lines": 17
     },
     {
       "id": "morra",
+      "label": "Smith-Morra Gambit",
       "side": "w",
       "lines": 22
     },
     {
       "id": "vienna",
+      "label": "Vienna Gambit",
       "side": "w",
       "lines": 15
     },
     {
       "id": "goring",
+      "label": "Göring Gambit",
       "side": "w",
       "lines": 2
     },
     {
       "id": "blackmar",
+      "label": "Blackmar-Diemer Gambit",
       "side": "w",
       "lines": 32
     },
     {
       "id": "halloween",
+      "label": "Halloween Gambit",
       "side": "w",
       "lines": 2
     },
     {
       "id": "stafford",
+      "label": "Stafford Gambit",
       "side": "b",
       "lines": 2
     },
     {
       "id": "budapest",
+      "label": "Budapest Gambit",
       "side": "b",
       "lines": 6
     },
     {
       "id": "albin",
+      "label": "Albin Countergambit",
       "side": "b",
       "lines": 9
     },
     {
       "id": "benko",
+      "label": "Benko Gambit",
       "side": "b",
       "lines": 19
     },
     {
       "id": "falkbeer",
+      "label": "Falkbeer Countergambit",
       "side": "b",
       "lines": 14
     },
     {
       "id": "elephant",
+      "label": "Elephant Gambit",
       "side": "b",
       "lines": 3
     },
     {
       "id": "latvian",
+      "label": "Latvian Gambit",
       "side": "b",
       "lines": 21
     },
     {
       "id": "englund",
+      "label": "Englund Gambit",
       "side": "b",
       "lines": 12
     },
     {
       "id": "marshall",
+      "label": "Marshall Attack",
       "side": "b",
       "lines": 0
     },
     {
       "id": "noahs-ark",
+      "label": "Noah's Ark Trap",
       "side": "b",
       "lines": 2
     },
     {
       "id": "mortimer",
+      "label": "Mortimer Trap",
       "side": "b",
       "lines": 1
     },
     {
       "id": "lasker-trap",
+      "label": "Lasker Trap",
       "side": "b",
       "lines": 1
     },
     {
       "id": "legal-trap",
+      "label": "Légal Trap",
       "side": "w",
       "lines": 0
     }

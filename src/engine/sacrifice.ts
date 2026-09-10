@@ -37,6 +37,14 @@ function material(chess: Chess, side: Color): number {
 }
 
 export interface ProbeBudget { expires: number; nodes: number }
+export interface SacrificeDetail {
+  size: number;
+  piece: Exclude<PieceSymbol, 'k'>;
+}
+export interface SacrificeChoice {
+  analysis: Analysis;
+  sacrifice?: SacrificeDetail;
+}
 function tick(budget: ProbeBudget): void {
   if (--budget.nodes < 0 || performance.now() >= budget.expires) throw new Error('Unresolved sacrifice');
 }
@@ -81,13 +89,13 @@ function settle(chess: Chess, side: Color, budget: ProbeBudget, depth = 6,
  * loss after tactical recovery. Includes declined offers and exchange sacrifices
  * (rook for minor), but excludes equal trades and already hanging pieces.
  */
-export function sacrificeSize(fen: string, pv: string[], budget: ProbeBudget): number {
+export function sacrificeDetail(fen: string, pv: string[], budget: ProbeBudget): SacrificeDetail | undefined {
   const root = new Chess(fen);
   const side = root.turn();
   const opponent = side === 'w' ? 'b' : 'w';
   const baseline = material(root, side);
   const chess = new Chess(fen);
-  let largest = 0;
+  let largest: SacrificeDetail | undefined;
   try {
     tick(budget);
     // Reject truncated/malformed lines rather than inventing a continuation.
@@ -101,6 +109,8 @@ export function sacrificeSize(fen: string, pv: string[], budget: ProbeBudget): n
       // A relocated piece is a fresh offer. For pieces left in place, require
       // a newly opened attack rather than counting an old hanging piece.
       if (square !== offered.to && root.isAttacked(square, opponent)) continue;
+      const offeredPiece = chess.get(square)?.type;
+      if (!offeredPiece || offeredPiece === 'k') continue;
       chess.move(uci(capture));
       try {
         let loss = baseline - material(chess, side);
@@ -118,12 +128,16 @@ export function sacrificeSize(fen: string, pv: string[], budget: ProbeBudget): n
         // Rank net investment, not the face value of the piece captured.
         // Cap at the immediate offer to exclude unrelated later material loss.
         loss = Math.min(loss, baseline - settle(chess, side, budget));
-        if (loss >= 100) largest = Math.max(largest, loss);
+        if (loss >= 100 && (!largest || loss > largest.size)) largest = { size: loss, piece: offeredPiece };
       } catch { /* An unresolved acceptance does not erase a verified one. */
       } finally { chess.undo(); }
     }
   } catch { /* Invalid line, exhausted budget or unresolved tactics: abstain. */ }
   return largest;
+}
+
+export function sacrificeSize(fen: string, pv: string[], budget: ProbeBudget): number {
+  return sacrificeDetail(fen, pv, budget)?.size ?? 0;
 }
 
 /** Cheap first-pass signal for a fresh material offer now or during the next
@@ -159,17 +173,24 @@ export function sacrificePotential(fen: string, pv: string[]): number {
  * PV. Scores still belong to the root move; this only measures its tactical
  * direction, including combinations that begin with a quiet move.
  */
-export function lineSacrificeSize(fen: string, pv: string[], budget: ProbeBudget): number {
+export function lineSacrificeDetail(fen: string, pv: string[], budget: ProbeBudget): SacrificeDetail | undefined {
   const line = new Chess(fen);
-  let largest = 0;
+  let largest: SacrificeDetail | undefined;
   try {
     for (let ply = 0; ply < pv.length && ply < FUTURE_SACRIFICE_MOVES * 2; ply++) {
-      if (!(ply & 1)) largest = Math.max(largest, sacrificeSize(line.fen(), pv.slice(ply), budget));
+      if (!(ply & 1)) {
+        const detail = sacrificeDetail(line.fen(), pv.slice(ply), budget);
+        if (detail && (!largest || detail.size > largest.size)) largest = detail;
+      }
       if (budget.nodes < 0 || performance.now() >= budget.expires) break;
       line.move(pv[ply]);
     }
   } catch { /* Preserve any earlier verified offer on an invalid frontier. */ }
   return largest;
+}
+
+export function lineSacrificeSize(fen: string, pv: string[], budget: ProbeBudget): number {
+  return lineSacrificeDetail(fen, pv, budget)?.size ?? 0;
 }
 
 export function offersSacrifice(fen: string, pv: string[], budget: ProbeBudget): boolean {
@@ -240,23 +261,26 @@ export function shortlistCandidates(fen: string, candidates: CandidateSet, fallb
 }
 
 export function chooseSacrifice(fen: string, candidates: CandidateSet, fallback: string,
-  expires = performance.now() + 80, preferred?: string): Analysis | undefined {
+  expires = performance.now() + 80, preferred?: string): SacrificeChoice | undefined {
   const eligible = eligibleCandidates(candidates, fallback);
   const budget = { expires, nodes: 1500 };
   // Probe the book first so its own investment is the baseline, sharing the
   // same time/node budget with all alternatives. Quiet book setup survives
   // unless another candidate has a verified offer.
-  let selected = eligible.find(info => info.pv[0] === preferred);
-  let largest = selected ? lineSacrificeSize(fen, selected.pv, budget) : 0;
+  const preferredAnalysis = eligible.find(info => info.pv[0] === preferred);
+  const preferredSacrifice = preferredAnalysis ? lineSacrificeDetail(fen, preferredAnalysis.pv, budget) : undefined;
+  let selected = preferredAnalysis ? { analysis: preferredAnalysis, sacrifice: preferredSacrifice } : undefined;
+  let largest = preferredSacrifice?.size ?? 0;
   for (const info of eligible) {
     if (info.pv[0] === preferred) continue;
     if (budget.nodes < 0 || performance.now() >= expires) break;
-    const size = lineSacrificeSize(fen, info.pv, budget);
+    const sacrifice = lineSacrificeDetail(fen, info.pv, budget);
+    const size = sacrifice?.size ?? 0;
     // Equal investments favor the smallest cp loss. Exact book ties preserve
     // the plan; other exact ties retain MultiPV order. Keep work on timeout.
     if (size > largest || (size > 0 && size === largest
-      && selected && info.score.value > selected.score.value)) {
-      largest = size; selected = info;
+      && selected && info.score.value > selected.analysis.score.value)) {
+      largest = size; selected = { analysis: info, sacrifice };
     }
     if (budget.nodes < 0 || performance.now() >= expires) break;
   }

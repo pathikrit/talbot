@@ -8,6 +8,7 @@ import { MoveSounds, soundForMove } from './sound';
 import { icons } from './icons';
 import { OpeningMemory } from './opening-memory';
 import type { EngineResponse } from './engine/protocol';
+import talPortrait from './assets/tal/mikhail-tal-1982.jpg';
 import '@lichess-org/chessground/assets/chessground.base.css';
 import '@lichess-org/chessground/assets/chessground.cburnett.css';
 import './style.css';
@@ -22,6 +23,17 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   </header>
   <main>
     <section class="board-area" aria-label="Chess game">
+      <div class="board-messages">
+        <a class="tal-portrait-link" href="https://commons.wikimedia.org/wiki/File:Mikhail_Tal_1982.jpg" target="_blank" rel="noopener noreferrer" aria-label="Mikhail Tal portrait source and license" title="Mikhail Tal, 1982 · Rob C. Croes / Anefo · CC BY-SA 3.0 NL">
+          <img class="tal-portrait" src="${talPortrait}" width="44" height="44" alt="Mikhail Tal in 1982">
+        </a>
+        <div class="message-copy">
+          <p id="status" role="status" aria-live="polite">Loading Patricia…</p>
+          <p id="result" aria-live="polite" hidden></p>
+          <p id="error" role="alert" hidden></p>
+          <div id="draw-actions" hidden><button id="accept-draw">Accept draw</button> <button id="decline-draw">Decline draw</button></div>
+        </div>
+      </div>
       <div class="board-layout">
         <div id="eval-bar" class="eval-bar" role="meter" aria-label="Patricia evaluation, White's perspective" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" title="Patricia evaluation · White's perspective">
           <div id="eval-white" class="eval-white"></div><span id="eval-score">—</span>
@@ -32,12 +44,6 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
           <div id="material" class="material" title="Material only: pawn 1 · knight/bishop 3 · rook 5 · queen 9"><span id="material-side">Even</span><strong id="material-score"></strong></div>
         </div>
         <div class="board-frame"><div id="board" aria-label="Chessboard. Drag or click pieces to move."></div></div>
-        <div class="board-messages">
-          <p id="status" role="status" aria-live="polite">Loading Patricia…</p>
-          <p id="result" aria-live="polite" hidden></p>
-          <p id="error" role="alert" hidden></p>
-          <div id="draw-actions" hidden><button id="accept-draw">Accept draw</button> <button id="decline-draw">Decline draw</button></div>
-        </div>
       </div>
     </section>
     <section class="moves-panel" aria-label="Move history">
@@ -151,13 +157,10 @@ function render(): void {
   element('eval-bar').setAttribute('aria-valuenow', String(Math.round(evaluation.percent)));
   element('eval-bar').setAttribute('aria-valuetext', evaluation.label === '—' ? 'Waiting for evaluation' : evaluation.label);
   element('eval-score').textContent = evaluation.label;
-  const status = controller.error ? 'Engine unavailable' : ending ?? {
-    loading: 'Loading Patricia…', thinking: 'Talbot is thinking', pondering: game.chess.isCheck() ? 'Your move — check' : 'Your move',
+  const routineStatus = controller.error ? 'Engine unavailable' : ending ?? {
+    loading: 'Loading Patricia…', thinking: game.cursor ? 'Talbot is thinking' : 'I’ll start.', pondering: game.chess.isCheck() ? 'Your move — check' : 'Your move',
     idle: 'Game complete', paused: 'Analysis paused', error: 'Engine unavailable',
   }[controller.mode];
-  element('status').textContent = status[0].toUpperCase() + status.slice(1);
-  element('error').hidden = !controller.error;
-  element('error').textContent = controller.error;
   element<HTMLButtonElement>('undo').disabled = !game.cursor;
   element<HTMLButtonElement>('redo').disabled = game.cursor >= game.history.length;
   element<HTMLButtonElement>('new-game').disabled = !!controller.error;
@@ -165,6 +168,11 @@ function render(): void {
   element('draw').textContent = controller.drawOffer === 'engine' ? 'Accept draw' : controller.drawOffer === 'human' ? 'Draw offered' : 'Offer draw';
   element<HTMLButtonElement>('draw').disabled = !controller.ready || !!controller.error || !game.active || controller.drawOffer === 'human';
   const result = ending ?? (controller.drawOffer === 'engine' ? 'Talbot offers a draw' : controller.drawNotice);
+  const special = !result && !controller.error && controller.mode === 'pondering' ? controller.announcement : '';
+  const status = special ? special + (game.chess.isCheck() ? ' — check!' : '') : routineStatus;
+  element('status').textContent = status[0].toUpperCase() + status.slice(1);
+  element('error').hidden = !controller.error;
+  element('error').textContent = controller.error;
   element('result').hidden = !result;
   element('result').textContent = result ? result[0].toUpperCase() + result.slice(1) : '';
   element('status').classList.toggle('sr-only', !!result || !!controller.error);

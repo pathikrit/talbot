@@ -215,6 +215,41 @@ describe('search lifecycle', () => {
     controller.play('e2e4');
     expect(search().opening).toBeUndefined();
   });
+  it('announces only committed opening and sacrifice decisions, then clears them on action', () => {
+    controller.play('e2e4');
+    controller.receive({
+      type: 'bestmove', id: search().id, move: 'e7e5', opening: 'stafford-line',
+      decision: { opening: 'Stafford Gambit' },
+    });
+    expect(controller.announcement).toBe('');
+    vi.advanceTimersByTime(1000);
+    expect(controller.announcement).toBe('Playing the Stafford Gambit!');
+    controller.play('g1f3');
+    expect(controller.announcement).toBe('');
+    const selected = parseInfo('info multipv 2 depth 8 score cp -25 pv b8c6 f1c4')!;
+    controller.receive({
+      type: 'bestmove', id: search().id, move: 'b8c6', selected,
+      decision: { sacrifice: { piece: 'rook', insteadOf: 'g8f6' } },
+    });
+    vi.advanceTimersByTime(1000);
+    expect(controller.announcement).toBe('Sacking a rook instead of Nf6!');
+    controller.undo();
+    expect(controller.announcement).toBe('');
+  });
+  it('announces only a forced mate for Tal from committed actual-root analysis', () => {
+    controller.play('e2e4');
+    const winning = parseInfo('info depth 8 score mate 4 pv e7e5 g1f3')!;
+    controller.receive({ type: 'bestmove', id: search().id, move: 'e7e5', selected: winning });
+    vi.advanceTimersByTime(1000);
+    expect(controller.announcement).toBe('Mate in 4!');
+
+    controller.newGame();
+    controller.play('e2e4');
+    const losing = parseInfo('info depth 8 score mate -4 pv e7e5 g1f3')!;
+    controller.receive({ type: 'bestmove', id: search().id, move: 'e7e5', selected: losing });
+    vi.advanceTimersByTime(1000);
+    expect(controller.announcement).toBe('');
+  });
   it('passes bounded opening memory to searches and records only fresh committed choices', () => {
     controller.dispose();
     const memory = {

@@ -20,6 +20,7 @@ export class Controller {
   error = '';
   analysis?: Analysis;
   evaluation?: Evaluation;
+  announcement = '';
   revision = 0;
   drawOffer?: 'human' | 'engine';
   drawNotice = '';
@@ -72,6 +73,7 @@ export class Controller {
             && assessed && assessed.depth >= 8 && assessed.score.kind === 'cp' && Math.abs(assessed.score.value) <= 20;
           const freshOpening = this.openings[this.game.cursor]?.[side] === undefined && message.opening;
           const plans = { ...this.openings[this.game.cursor], [side]: message.opening ?? null };
+          this.announcement = this.moveAnnouncement(message, assessed, !!freshOpening);
           const played = this.game.play(message.move);
           if (freshOpening) this.openingMemory.remember({ lineId: freshOpening, move: message.move });
           this.notifyMove(played, false);
@@ -99,6 +101,21 @@ export class Controller {
 
   private notifyMove(move: Move, human: boolean): void {
     try { this.moved(move, human); } catch { /* Optional feedback cannot interrupt the game. */ }
+  }
+
+  private moveAnnouncement(message: Extract<EngineResponse, { type: 'bestmove' }>,
+    analysis: Analysis | undefined, freshOpening: boolean): string {
+    if (analysis?.pv[0] === message.move && analysis.score.kind === 'mate' && analysis.score.value > 0) {
+      return `Mate in ${analysis.score.value}!`;
+    }
+    if (freshOpening && message.decision?.opening) return `Playing the ${message.decision.opening}!`;
+    if (message.decision?.sacrifice) {
+      let alternative = message.decision.sacrifice.insteadOf;
+      try { alternative = new Chess(this.game.chess.fen()).move(alternative).san; }
+      catch { /* Valid engine metadata should always describe a legal root move. */ }
+      return `Sacking a ${message.decision.sacrifice.piece} instead of ${alternative}!`;
+    }
+    return '';
   }
 
   private sync(preserveEvaluation = false): void {
@@ -143,6 +160,7 @@ export class Controller {
 
   play(uci: string): void {
     if (!this.ready || this.error || !this.visible || !this.game.humanTurn || this.game.over) return;
+    this.announcement = '';
     const plans = { ...this.openings[this.game.cursor] };
     const played = this.game.play(uci);
     this.notifyMove(played, true);
@@ -175,13 +193,14 @@ export class Controller {
     this.game.agreeDraw(); this.clearDraw(); this.sync(true);
   }
   declineDraw(): void { if (this.drawOffer === 'engine') { this.clearDraw(); this.changed(); } }
-  swap(): void { this.clearDraw(); this.game.swap(); this.prediction = undefined; this.sync(true); }
-  resign(): void { this.clearDraw(); this.game.resign(); this.prediction = undefined; this.sync(true); }
-  undo(): void { this.clearDraw(); this.game.undo(); this.prediction = undefined; this.sync(); }
-  seek(cursor: number): void { this.clearDraw(); this.game.seek(cursor); this.prediction = undefined; this.sync(); }
-  redo(): void { this.clearDraw(); this.game.redo(); this.prediction = undefined; this.sync(); }
+  swap(): void { this.clearDraw(); this.announcement = ''; this.game.swap(); this.prediction = undefined; this.sync(true); }
+  resign(): void { this.clearDraw(); this.announcement = ''; this.game.resign(); this.prediction = undefined; this.sync(true); }
+  undo(): void { this.clearDraw(); this.announcement = ''; this.game.undo(); this.prediction = undefined; this.sync(); }
+  seek(cursor: number): void { this.clearDraw(); this.announcement = ''; this.game.seek(cursor); this.prediction = undefined; this.sync(); }
+  redo(): void { this.clearDraw(); this.announcement = ''; this.game.redo(); this.prediction = undefined; this.sync(); }
   newGame(): void {
     this.clearDraw(); this.lastDrawOffer = -20;
+    this.announcement = '';
     this.game.reset();
     this.openings = [{}];
     this.prediction = undefined;

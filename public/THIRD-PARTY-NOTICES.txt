@@ -16,6 +16,14 @@ No public asset license was supplied by the mirror; these recordings are not
 covered by Talbot's GPL license. See ./licenses/CHESS-SOUNDS-NOTICE.txt.
 Original files and provenance are in src/assets/sound in the source archive.
 
+Mikhail Tal, 1982, photographed by Rob C. Croes for Anefo.
+Nationaal Archief, Bestanddeelnummer 931-9186.
+The bundled 160-by-160-pixel thumbnail is center-cropped and resized from:
+https://commons.wikimedia.org/wiki/File:Mikhail_Tal_1982.jpg
+Creative Commons Attribution-ShareAlike 3.0 Netherlands.
+https://creativecommons.org/licenses/by-sa/3.0/nl/deed.en
+Full attribution and provenance: ./licenses/MIKHAIL-TAL-PHOTO-NOTICE.txt
+
 Talbot application and browser adapter: GPL-3.0-only, without warranty.
 Full license: ./licenses/GPL-3.0.txt
 Corresponding source for this build: ./talbot-source.tar.gz

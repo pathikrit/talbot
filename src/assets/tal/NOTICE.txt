@@ -1,0 +1,23 @@
+Mikhail Tal, 1982
+=================
+
+Photograph by Rob C. Croes for Anefo.
+Nationaal Archief, The Hague, Fotocollectie Algemeen Nederlands
+Persbureau (ANEFO), 1945-1989, Bestanddeelnummer 931-9186.
+
+Source:
+https://commons.wikimedia.org/wiki/File:Mikhail_Tal_1982.jpg
+
+Original image SHA-256:
+7579eaa3f5df0fef2498413bac1f8e4c2e9afff86325313178f9895a184b8f1c
+
+The bundled mikhail-tal-1982.jpg is a center-cropped, resized, metadata-stripped
+160-by-160-pixel derivative. Derived image SHA-256:
+58572e9476143fd33c42d1632d463f3182da3e624545ed5ff75a7dbf1868f01a
+
+Licensed under Creative Commons Attribution-ShareAlike 3.0 Netherlands:
+https://creativecommons.org/licenses/by-sa/3.0/nl/deed.en
+https://creativecommons.org/licenses/by-sa/3.0/nl/legalcode
+
+The photographer, Anefo, Nationaal Archief, and Wikimedia Commons do not
+endorse Talbot.

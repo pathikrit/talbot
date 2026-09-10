@@ -3,8 +3,9 @@
 Keep README.md limited to the user's one-liner, build badge, and `make dev`.
 Technical documentation belongs in this file.
 
-- Preserve the minimal UI: talbot header, New game / Swap sides, wooden board,
-  left-hand evaluation bar and capture strip, Undo / Redo.
+- Preserve the minimal UI: talbot header, New game / Swap sides, compact Tal
+  portrait/commentary above the wooden board, left-hand evaluation bar and
+  capture strip, Undo / Redo.
   No marketing copy, status cards, footer, or keyboard-entry form.
 - Use Font Awesome Free Solid icons for mute, swap, undo and redo, with hover titles
   Mute/UnMute, Swap Sides, Undo Move, Redo Move and accessible button names.
@@ -48,6 +49,11 @@ Technical documentation belongs in this file.
 - Keep AGENTS.md in scripts/package-source.mjs's allowlist because it contains
   the corresponding-source build instructions.
 - GitHub remote is git@github.com:pathikrit/talbot.git; main tracks origin/main.
+- Keep Tal's commentary in one live region above the full board assembly. Use
+  deterministic flavor only for the first turn, a fresh book choice, a verified
+  non-best sacrifice and Tal's own forced mate; never announce speculative,
+  cancelled or replayed decisions. The locally bundled 1982 portrait is Rob C.
+  Croes/Anefo, CC BY-SA 3.0 NL; retain its source link and shipped notice.
 - Engine build scripts require Bash: Emscripten's environment script cannot
   locate its SDK when sourced through Ubuntu's dash (/bin/sh). Keep Make's
   explicit bash invocation as well as the build script's Bash shebang.
@@ -333,7 +339,8 @@ move or while the engine starts as White. Resigning records the current human
 color, cancels searches and buffered replies, and locks play; swapping does not
 change the result. Undo/redo navigation clears resignation to allow exploration.
 Agreement draws behave the same way. All messaging (status, results, draw offers,
-and errors) belongs centered beneath the board, not in Moves.
+and errors) belongs in the compact portrait row above the board assembly, not
+in Moves.
 Draw negotiation is an application policy, not a native Patricia/UCI offer:
 use actual-root depth >= 8 evaluation, accepting if engine score <= 20cp or
 it faces a forced mate. Unknown/shallow scores wait; speculative ponder scores

@@ -11,11 +11,11 @@ export interface BookLine {
   path: number[];
 }
 export interface BookData {
-  families: { id: string; side: string; weight: number }[];
+  families: { id: string; side: string; weight: number; label: string }[];
   positions: string[];
   lines: BookLine[];
 }
-export interface BookChoice { analysis: Analysis; lineId: string }
+export interface BookChoice { analysis: Analysis; lineId: string; name: string }
 export const openingKey = (chess: Chess): string => chess.fen().split(' ').slice(0, 4).join(' ');
 
 function weighted<T>(items: T[], weight: (item: T) => number, random: () => number): T {
@@ -67,7 +67,7 @@ export class OpeningBook {
       // of a line or introduce random branches after committing to it.
       const ply = line.path.indexOf(positionId, request.moves.length);
       const analysis = ply < 0 ? undefined : eligible.get(line.moves[ply]);
-      return analysis ? { analysis, lineId } : undefined;
+      return analysis ? { analysis, lineId, name: this.families.get(line.family)!.label } : undefined;
     }
     // Fresh choices are limited to each side's first two moves. Once attempted,
     // the controller records either the chosen line or permanent fallback.
@@ -102,7 +102,7 @@ export class OpeningBook {
     const { lines } = weighted(families, ({ family }) =>
       family.weight / (1 + 3 * (familyCounts.get(family.id) ?? 0)), random);
     const line = weighted(lines, line => 1 / (1 + 2 * (lineCounts.get(line.id) ?? 0)), random);
-    return { analysis: eligible.get(move)!, lineId: line.id };
+    return { analysis: eligible.get(move)!, lineId: line.id, name: this.families.get(line.family)!.label };
   }
 }
 

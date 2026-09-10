@@ -1,5 +1,10 @@
 export interface PositionRequest { fen: string; moves: string[] }
 export interface RecentOpening { lineId: string; move: string }
+export type SacrificedPiece = 'pawn' | 'knight' | 'bishop' | 'rook' | 'queen';
+export interface MoveDecision {
+  opening?: string;
+  sacrifice?: { piece: SacrificedPiece; insteadOf: string };
+}
 export interface SearchRequest {
   type: 'search';
   id: number;
@@ -30,7 +35,7 @@ export interface Analysis {
 export type EngineResponse =
   | { type: 'ready' }
   | { type: 'info'; id: number; analysis: Analysis }
-  | { type: 'bestmove'; id: number; move: string; selected?: Analysis; opening?: string | null }
+  | { type: 'bestmove'; id: number; move: string; selected?: Analysis; opening?: string | null; decision?: MoveDecision }
   | { type: 'error'; message: string };
 
 export function parseInfo(line: string): Analysis | undefined {

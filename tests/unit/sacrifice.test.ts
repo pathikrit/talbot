@@ -1,7 +1,7 @@
 import { Chess } from 'chess.js';
 import { describe, expect, it } from 'vitest';
-import { avoidDraw, CandidateSet, chooseSacrifice, drawsInLine, lineSacrificeSize, offersSacrifice, sacrificePotential,
-  sacrificeSize, shortlistCandidates } from '../../src/engine/sacrifice';
+import { avoidDraw, CandidateSet, chooseSacrifice, drawsInLine, lineSacrificeSize, offersSacrifice, sacrificeDetail,
+  sacrificePotential, sacrificeSize, shortlistCandidates } from '../../src/engine/sacrifice';
 import { parseInfo } from '../../src/engine/protocol';
 import { settings } from '../../src/settings';
 
@@ -56,11 +56,11 @@ describe('candidate ranking', () => {
     const set = new CandidateSet(2);
     set.add(info(1, 'h1g1', 50));
     set.add(info(2, 'h1h2', 20));
-    expect(chooseSacrifice(pawnOffer, set, 'h1g1', Infinity, 'h1h2')?.pv[0]).toBe('h1h2');
+    expect(chooseSacrifice(pawnOffer, set, 'h1g1', Infinity, 'h1h2')?.analysis.pv[0]).toBe('h1h2');
     set.add(info(1, 'e3e4', 50, 8));
     set.add(info(2, 'h1h2', 20, 8));
-    expect(chooseSacrifice(pawnOffer, set, 'e3e4', Infinity, 'h1h2')?.pv[0]).toBe('e3e4');
-    expect(chooseSacrifice(pawnOffer, set, 'e3e4', 0, 'h1h2')?.pv[0]).toBe('h1h2');
+    expect(chooseSacrifice(pawnOffer, set, 'e3e4', Infinity, 'h1h2')?.analysis.pv[0]).toBe('e3e4');
+    expect(chooseSacrifice(pawnOffer, set, 'e3e4', 0, 'h1h2')?.analysis.pv[0]).toBe('h1h2');
   });
   it('compares the book investment and overrides only for size or a better equal-size score', () => {
     const fen = 'k7/8/8/p7/3p4/8/1P4N1/7K w - - 0 1';
@@ -68,19 +68,19 @@ describe('candidate ranking', () => {
     set.add(info(1, 'h1g1', 50));
     set.add(info(2, 'b2b4 a8b8', 40));
     set.add(info(3, 'g2e3 a8b8', 50 - settings.maxSacrificeLossCp));
-    expect(chooseSacrifice(fen, set, 'h1g1', Infinity, 'b2b4')?.pv[0]).toBe('g2e3');
-    expect(chooseSacrifice(fen, set, 'h1g1', Infinity, 'g2e3')?.pv[0]).toBe('g2e3');
+    expect(chooseSacrifice(fen, set, 'h1g1', Infinity, 'b2b4')?.analysis.pv[0]).toBe('g2e3');
+    expect(chooseSacrifice(fen, set, 'h1g1', Infinity, 'g2e3')?.analysis.pv[0]).toBe('g2e3');
     set.add(info(1, 'h1g1', 50, 8));
     set.add(info(2, 'b2b4 a8b8', 40, 8));
     set.add(info(3, 'g2e3 a8b8', 49 - settings.maxSacrificeLossCp, 8));
-    expect(chooseSacrifice(fen, set, 'h1g1', Infinity, 'b2b4')?.pv[0]).toBe('b2b4');
+    expect(chooseSacrifice(fen, set, 'h1g1', Infinity, 'b2b4')?.analysis.pv[0]).toBe('b2b4');
 
     const equal = new CandidateSet(2);
     const pawns = 'k7/8/8/3p1p2/8/4P1P1/8/7K w - - 0 1';
     equal.add(info(1, 'e3e4', 30)); equal.add(info(2, 'g3g4', 20));
-    expect(chooseSacrifice(pawns, equal, 'e3e4', Infinity, 'g3g4')?.pv[0]).toBe('e3e4');
+    expect(chooseSacrifice(pawns, equal, 'e3e4', Infinity, 'g3g4')?.analysis.pv[0]).toBe('e3e4');
     equal.add(info(1, 'e3e4', 30, 8)); equal.add(info(2, 'g3g4', 30, 8));
-    expect(chooseSacrifice(pawns, equal, 'e3e4', Infinity, 'g3g4')?.pv[0]).toBe('g3g4');
+    expect(chooseSacrifice(pawns, equal, 'e3e4', Infinity, 'g3g4')?.analysis.pv[0]).toBe('g3g4');
   });
   it('avoids a threefold repetition for no more than the configured cp loss', () => {
     const chess = new Chess();
@@ -119,7 +119,7 @@ describe('candidate ranking', () => {
     set.add(info(1, 'h1g1', 50));
     set.add(info(2, 'e3e4', 30));
     set.add(info(3, 'g3g4', 20));
-    expect(chooseSacrifice(fen, set, 'h1g1', performance.now() + 2000)?.pv[0]).toBe('e3e4');
+    expect(chooseSacrifice(fen, set, 'h1g1', performance.now() + 2000)?.analysis.pv[0]).toBe('e3e4');
   });
   it('prefers a larger sacrifice even with a worse evaluation, within the allowance', () => {
     const fen = 'k7/8/8/p7/3p4/8/1P4N1/7K w - - 0 1';
@@ -127,11 +127,11 @@ describe('candidate ranking', () => {
     set.add(info(1, 'h1g1', 50));
     set.add(info(2, 'b2b4 a8b8', 40));
     set.add(info(3, 'g2e3 a8b8', 50 - settings.maxSacrificeLossCp));
-    expect(chooseSacrifice(fen, set, 'h1g1', performance.now() + 2000)?.pv[0]).toBe('g2e3');
+    expect(chooseSacrifice(fen, set, 'h1g1', performance.now() + 2000)?.analysis.pv[0]).toBe('g2e3');
     set.add(info(1, 'h1g1', 50, 8));
     set.add(info(2, 'b2b4 a8b8', 40, 8));
     set.add(info(3, 'g2e3 a8b8', 49 - settings.maxSacrificeLossCp, 8));
-    expect(chooseSacrifice(fen, set, 'h1g1', performance.now() + 2000)?.pv[0]).toBe('b2b4');
+    expect(chooseSacrifice(fen, set, 'h1g1', performance.now() + 2000)?.analysis.pv[0]).toBe('b2b4');
   });
   it('finds and verifies a sacrifice after a quiet setup move', () => {
     const quiet = ['h1g1', 'a8b8', 'e3e4', 'b8a8'];
@@ -141,19 +141,25 @@ describe('candidate ranking', () => {
     set.add(info(1, 'h1h2 a8b8', 50));
     set.add(info(2, quiet.join(' '), 0));
     expect(shortlistCandidates(pawnOffer, set, 'h1h2', 2)).toEqual(['h1h2', 'h1g1']);
-    expect(chooseSacrifice(pawnOffer, set, 'h1h2', performance.now() + 2000)?.pv[0]).toBe('h1g1');
+    const chosen = chooseSacrifice(pawnOffer, set, 'h1h2', performance.now() + 2000);
+    expect(chosen?.analysis.pv[0]).toBe('h1g1');
+    expect(chosen?.sacrifice).toEqual({ size: 100, piece: 'p' });
   });
   it('measures net material rather than the captured piece face value', () => {
     const budget = () => ({ expires: performance.now() + 2000, nodes: 10000 });
-    expect(sacrificeSize('k7/8/4p3/3n4/8/8/8/3R3K w - - 0 1', ['d1d5', 'a8b8'], budget())).toBe(180);
-    expect(sacrificeSize('k7/8/4p3/3r4/8/8/8/3Q3K w - - 0 1', ['d1d5', 'a8b8'], budget())).toBe(400);
+    const rook = 'k7/8/4p3/3n4/8/8/8/3R3K w - - 0 1';
+    const queen = 'k7/8/4p3/3r4/8/8/8/3Q3K w - - 0 1';
+    expect(sacrificeSize(rook, ['d1d5', 'a8b8'], budget())).toBe(180);
+    expect(sacrificeDetail(rook, ['d1d5', 'a8b8'], budget())).toEqual({ size: 180, piece: 'r' });
+    expect(sacrificeSize(queen, ['d1d5', 'a8b8'], budget())).toBe(400);
+    expect(sacrificeDetail(queen, ['d1d5', 'a8b8'], budget())).toEqual({ size: 400, piece: 'q' });
   });
   it('enforces the configured cp budget with inclusive boundary', () => {
     const set = new CandidateSet(2);
     set.add(info(1, 'h1g1', 21 + settings.maxSacrificeLossCp)); set.add(info(2, 'e3e4', 20));
     expect(chooseSacrifice(pawnOffer, set, 'h1g1')).toBeUndefined();
     set.add(info(1, 'h1g1', 20 + settings.maxSacrificeLossCp, 8)); set.add(info(2, 'e3e4', 20, 8));
-    expect(chooseSacrifice(pawnOffer, set, 'h1g1')?.pv[0]).toBe('e3e4');
+    expect(chooseSacrifice(pawnOffer, set, 'h1g1')?.analysis.pv[0]).toBe('e3e4');
   });
   it('preserves mate decisions, including newer incomplete search results', () => {
     const set = new CandidateSet(2);
