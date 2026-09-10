@@ -201,7 +201,7 @@
     {
       "id": "marshall",
       "side": "b",
-      "lines": 5
+      "lines": 0
     },
     {
       "id": "noahs-ark",
@@ -222,21 +222,6 @@
       "id": "legal-trap",
       "side": "w",
       "lines": 0
-    },
-    {
-      "id": "italian",
-      "side": "w",
-      "lines": 4
-    },
-    {
-      "id": "sicilian",
-      "side": "b",
-      "lines": 2
-    },
-    {
-      "id": "french",
-      "side": "b",
-      "lines": 4
     }
   ],
   "attribution": [
@@ -338,13 +323,6 @@
     },
     {
       "id": "081d1abd99024a98",
-      "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
-      ]
-    },
-    {
-      "id": "08e462270ae2c675",
       "sources": [
         "lichess:eco_tsv",
         "eco:eco_tsv"
@@ -504,13 +482,6 @@
     },
     {
       "id": "1389afed987f1393",
-      "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
-      ]
-    },
-    {
-      "id": "13bb63dd8ee54161",
       "sources": [
         "lichess:eco_tsv",
         "eco:eco_tsv"
@@ -711,13 +682,6 @@
       ]
     },
     {
-      "id": "250b0075d4a21c0f",
-      "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
-      ]
-    },
-    {
       "id": "252ec34e40b28993",
       "sources": [
         "lichess:eco_tsv",
@@ -741,8 +705,7 @@
     {
       "id": "259a160ef79df158",
       "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
+        "lichess:eco_tsv"
       ]
     },
     {
@@ -762,8 +725,7 @@
     {
       "id": "2871e8c69c2f6800",
       "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
+        "lichess:eco_tsv"
       ]
     },
     {
@@ -864,8 +826,7 @@
     {
       "id": "2d7590fe859c02fc",
       "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
+        "lichess:eco_tsv"
       ]
     },
     {
@@ -1039,13 +1000,6 @@
       ]
     },
     {
-      "id": "38c69dabaefe822b",
-      "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
-      ]
-    },
-    {
       "id": "39117ed29e27d0b2",
       "sources": [
         "lichess:eco_tsv",
@@ -1074,13 +1028,6 @@
       ]
     },
     {
-      "id": "3b3ec51d5d93f360",
-      "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
-      ]
-    },
-    {
       "id": "3bad896204e9c412",
       "sources": [
         "lichess:eco_tsv",
@@ -1096,13 +1043,6 @@
     },
     {
       "id": "3c341b86285fdd33",
-      "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
-      ]
-    },
-    {
-      "id": "3c9f92bd35baa3bc",
       "sources": [
         "lichess:eco_tsv",
         "eco:eco_tsv"
@@ -1362,19 +1302,6 @@
       "id": "4f8cb95d36d1a1d5",
       "sources": [
         "lichess:eco_tsv",
-        "eco:eco_tsv"
-      ]
-    },
-    {
-      "id": "4fc63c182aee15fd",
-      "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
-      ]
-    },
-    {
-      "id": "4ff24c8f443464e2",
-      "sources": [
         "eco:eco_tsv"
       ]
     },
@@ -1648,6 +1575,12 @@
       ]
     },
     {
+      "id": "63fac2af9026385e",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
       "id": "64148d6c1242223f",
       "sources": [
         "lichess:eco_tsv",
@@ -1677,13 +1610,6 @@
     },
     {
       "id": "65ea55be773c6673",
-      "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
-      ]
-    },
-    {
-      "id": "66205cdb345adc43",
       "sources": [
         "lichess:eco_tsv",
         "eco:eco_tsv"
@@ -2000,6 +1926,12 @@
       ]
     },
     {
+      "id": "7fc8976fa700842b",
+      "sources": [
+        "lichess:eco_tsv"
+      ]
+    },
+    {
       "id": "7fd8d31f60eeb2a9",
       "sources": [
         "lichess:eco_tsv",
@@ -2103,22 +2035,10 @@
       ]
     },
     {
-      "id": "87e4761cccc7a2c5",
-      "sources": [
-        "eco:eco_tsv"
-      ]
-    },
-    {
       "id": "882841231216c4f8",
       "sources": [
         "lichess:eco_tsv",
         "eco:eco_tsv"
-      ]
-    },
-    {
-      "id": "89aff51b226e77dd",
-      "sources": [
-        "lichess:eco_tsv"
       ]
     },
     {
@@ -2184,13 +2104,6 @@
     },
     {
       "id": "8d48c16a6f10fbd0",
-      "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
-      ]
-    },
-    {
-      "id": "8ea4f669af1dbef8",
       "sources": [
         "lichess:eco_tsv",
         "eco:eco_tsv"
@@ -2619,13 +2532,6 @@
       ]
     },
     {
-      "id": "aeb9d23449f13949",
-      "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
-      ]
-    },
-    {
       "id": "aef5268f22f2b318",
       "sources": [
         "lichess:eco_tsv",
@@ -2870,13 +2776,6 @@
       ]
     },
     {
-      "id": "c5d96b180ca651a8",
-      "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
-      ]
-    },
-    {
       "id": "c5f7b0287c2cfd57",
       "sources": [
         "lichess:eco_tsv",
@@ -3000,8 +2899,7 @@
     {
       "id": "cba457833cc53749",
       "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
+        "lichess:eco_tsv"
       ]
     },
     {
@@ -3121,12 +3019,6 @@
       ]
     },
     {
-      "id": "d6097c2b93f37981",
-      "sources": [
-        "lichess:eco_tsv"
-      ]
-    },
-    {
       "id": "d6c87977ee0cda07",
       "sources": [
         "lichess:eco_tsv",
@@ -3179,12 +3071,6 @@
       "sources": [
         "lichess:eco_tsv",
         "eco:eco_tsv"
-      ]
-    },
-    {
-      "id": "da719111ac56d8fd",
-      "sources": [
-        "lichess:eco_tsv"
       ]
     },
     {
@@ -3273,13 +3159,6 @@
     },
     {
       "id": "e191408bbc21463b",
-      "sources": [
-        "lichess:eco_tsv",
-        "eco:eco_tsv"
-      ]
-    },
-    {
-      "id": "e2241126efb35722",
       "sources": [
         "lichess:eco_tsv",
         "eco:eco_tsv"

@@ -63,6 +63,10 @@ const merged = new Map();
 const rejected = [];
 for (const row of rows) {
   if (typeof row.name !== 'string' || typeof row.moves !== 'string') continue;
+  // The runtime repertoire is exclusively named gambits and traps. Keep the
+  // side-reviewed family allowlist as well: a name alone cannot identify which
+  // army offers the gambit or sets the trap.
+  if (!/gambit|trap/i.test(row.name)) continue;
   const family = families.find(f => new RegExp(f.pattern, 'i').test(row.name)
     && (!f.exclude || !new RegExp(f.exclude, 'i').test(row.name)));
   if (!family) continue;

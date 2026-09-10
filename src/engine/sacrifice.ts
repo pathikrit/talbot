@@ -240,16 +240,24 @@ export function shortlistCandidates(fen: string, candidates: CandidateSet, fallb
 }
 
 export function chooseSacrifice(fen: string, candidates: CandidateSet, fallback: string,
-  expires = performance.now() + 80): Analysis | undefined {
+  expires = performance.now() + 80, preferred?: string): Analysis | undefined {
   const eligible = eligibleCandidates(candidates, fallback);
   const budget = { expires, nodes: 1500 };
-  let selected: Analysis | undefined;
-  let largest = 0;
+  // Probe the book first so its own investment is the baseline, sharing the
+  // same time/node budget with all alternatives. Quiet book setup survives
+  // unless another candidate has a verified offer.
+  let selected = eligible.find(info => info.pv[0] === preferred);
+  let largest = selected ? lineSacrificeSize(fen, selected.pv, budget) : 0;
   for (const info of eligible) {
+    if (info.pv[0] === preferred) continue;
+    if (budget.nodes < 0 || performance.now() >= expires) break;
     const size = lineSacrificeSize(fen, info.pv, budget);
-    // Candidates are evaluation-sorted, so equal-sized offers keep the better
-    // score (then the original MultiPV order). Retain verified work on timeout.
-    if (size > largest) { largest = size; selected = info; }
+    // Equal investments favor the smallest cp loss. Exact book ties preserve
+    // the plan; other exact ties retain MultiPV order. Keep work on timeout.
+    if (size > largest || (size > 0 && size === largest
+      && selected && info.score.value > selected.score.value)) {
+      largest = size; selected = info;
+    }
     if (budget.nodes < 0 || performance.now() >= expires) break;
   }
   return selected;
