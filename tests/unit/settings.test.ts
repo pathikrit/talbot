@@ -5,7 +5,7 @@ import config from '../../settings.json';
 it('loads settings.json as immutable shared configuration', () => {
   expect(settings).toEqual(config);
   expect(Object.isFrozen(settings)).toBe(true);
-  expect(settings.maxSacrificeLossCp).toBe(75);
+  expect(settings.maxSacrificeLossCp).toBe(100);
   expect(settings.maxDrawAvoidanceLossCp).toBe(1);
   expect(SEARCH_MULTIPV).toBe(50);
 });

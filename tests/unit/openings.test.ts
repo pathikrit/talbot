@@ -123,11 +123,11 @@ describe('initial random choice then committed repertoire', () => {
     expect(choice?.analysis.pv[0]).toBe('f2f4');
     expect(choice?.lineId).toBe('kings');
   });
-  it('accepts a line at 75cp loss but abandons it above that', () => {
+  it('accepts a line at a one-pawn loss but abandons it above that', () => {
     const { chess, request } = position(['e2e4', 'e7e5']);
     const book = new OpeningBook(fixture());
-    expect(book.choose(chess, request, candidates(['g1f3', 'f2f4'], [30, -45]), 'g1f3', 'kings')?.analysis.pv[0]).toBe('f2f4');
-    expect(book.choose(chess, request, candidates(['g1f3', 'f2f4'], [30, -46]), 'g1f3', 'kings')).toBeUndefined();
+    expect(book.choose(chess, request, candidates(['g1f3', 'f2f4'], [30, -70]), 'g1f3', 'kings')?.analysis.pv[0]).toBe('f2f4');
+    expect(book.choose(chess, request, candidates(['g1f3', 'f2f4'], [30, -71]), 'g1f3', 'kings')).toBeUndefined();
   });
   it('falls back on deviations, exhausted lines and explicit out-of-book state', () => {
     const book = new OpeningBook(fixture());

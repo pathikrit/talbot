@@ -147,11 +147,11 @@ the controller; rendering every candidate can starve pointer events during searc
 ### Sacrifice selection
 
 `src/engine/sacrifice.ts` chooses the largest verified net material offer within
-75cp of the best candidate by default, breaking size ties by better evaluation
+100cp (one pawn) of the best candidate by default, breaking size ties by better evaluation
 and then MultiPV order. Search requests 50 distinct root moves, capped
 at the legal move count. Timed play spends 45% of the available search window on
 that broad pass, cheaply ranks sacrifice potential through the next four Talbot
-turns in each PV, then restricts Patricia's remaining search to six finalists.
+turns in each PV, then searches up to 50 finalists with Patricia's remaining time.
 The finalists always include the broad best move and any eligible chosen book
 move. Pondering remains an unrestricted long-running 50-line search to warm TT.
 Only the latest complete common-depth batch (depth >= 4) from each stage is

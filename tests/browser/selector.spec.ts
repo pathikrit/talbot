@@ -7,7 +7,7 @@ const openingData = JSON.parse(readFileSync(new URL('../../book/opening-book.jso
 
 const workerAsset = readdirSync(new URL('../../dist/assets/', import.meta.url)).find(name => /^worker-.*\.js$/.test(name))!;
 
-test('the staged production worker deepens and selects a future declined sacrifice within 75cp', async ({ page }) => {
+test('the staged production worker deepens and selects a future declined sacrifice within one pawn', async ({ page }) => {
   // Exercise the actual bundled worker/selector with deterministic Patricia
   // output; separate app tests exercise real WASM searches and timing.
   await page.route('**/harness.html', route => route.fulfill({ contentType: 'text/html', body: '<title>Worker test</title>' }));
@@ -17,7 +17,7 @@ test('the staged production worker deepens and selects a future declined sacrifi
         if (name === 'talbot_position') return 1;
         if (name === 'talbot_search' || name === 'talbot_search_moves') {
           const depth = name === 'talbot_search' ? 4 : 8;
-          print('info depth ' + depth + ' multipv 1 score cp 75 pv h1h2 a8b8');
+          print('info depth ' + depth + ' multipv 1 score cp 100 pv h1h2 a8b8');
           print('info depth ' + depth + ' multipv 2 score cp 0 pv h1g1 a8b8 e3e4 b8a8');
           print('bestmove h1h2');
           return Promise.resolve();
@@ -109,7 +109,7 @@ test('bundled book follows its plan, falls back when invalid, and retires it for
         if (name === 'talbot_search' || name === 'talbot_search_moves') {
           if (name === 'talbot_search') search++;
           print('info depth 7 multipv 1 score cp 40 pv b1c3');
-          print('info depth 7 multipv 2 score cp ' + (search === 3 ? -36 : 0) + ' pv g1f3');
+          print('info depth 7 multipv 2 score cp ' + (search === 3 ? -61 : 0) + ' pv g1f3');
           if (search === 4) print('info depth 7 multipv 3 score cp 0 pv f2f4 e5f4 g1f3 d7d6');
           print('bestmove b1c3');
           return Promise.resolve();

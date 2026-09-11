@@ -3,6 +3,7 @@ import { now, parseInfo } from './protocol';
 import { avoidDraw, CandidateSet, chooseSacrifice, shortlistCandidates, SELECTOR_RESERVE_MS } from './sacrifice';
 import { openingBook } from './openings';
 import type { EngineRequest, EngineResponse, SearchRequest } from './protocol';
+import { SEARCH_MULTIPV } from '../settings';
 
 interface PatriciaModule {
   ccall(name: string, result: string | null, types: string[], args: unknown[], options?: { async: boolean }): unknown;
@@ -17,7 +18,7 @@ let initializing = false;
 let failed = false;
 let candidates: CandidateSet | undefined;
 let bestmove: string | undefined;
-const FINALIST_MULTIPV = 6;
+const FINALIST_MULTIPV = SEARCH_MULTIPV;
 const BROAD_SEARCH_SHARE = 0.45;
 const pieceNames = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen' } as const;
 
