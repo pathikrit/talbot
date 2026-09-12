@@ -1,7 +1,7 @@
 import config from '../settings.json';
 
 // Internal search breadth, not a user-facing style setting.
-export const SEARCH_MULTIPV = 50;
+export const SEARCH_MULTIPV = 100;
 
 interface Settings {
   maxSacrificeLossCp: number;

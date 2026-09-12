@@ -7,7 +7,7 @@ it('loads settings.json as immutable shared configuration', () => {
   expect(Object.isFrozen(settings)).toBe(true);
   expect(settings.maxSacrificeLossCp).toBe(100);
   expect(settings.maxDrawAvoidanceLossCp).toBe(1);
-  expect(SEARCH_MULTIPV).toBe(50);
+  expect(SEARCH_MULTIPV).toBe(100);
 });
 
 it.each([-1, 0.5, Infinity])('rejects invalid centipawn budget %s', maxSacrificeLossCp => {
