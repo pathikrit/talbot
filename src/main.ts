@@ -2,8 +2,9 @@ import { Chessground } from '@lichess-org/chessground';
 import type { Key } from '@lichess-org/chessground/types';
 import type { Square } from 'chess.js';
 import { Controller } from './controller';
-import { colorName } from './game';
+import { Game, colorName } from './game';
 import { evaluationBar } from './evaluation';
+import { gameFromHash, gameHash } from './share';
 import { MoveSounds, soundForMove } from './sound';
 import { icons } from './icons';
 import { OpeningMemory } from './opening-memory';
@@ -61,7 +62,8 @@ const element = <T extends HTMLElement = HTMLElement>(id: string) => document.ge
 const worker = new Worker(new URL('./engine/worker.ts', import.meta.url), { type: 'module' });
 const sounds = new MoveSounds();
 const openingMemory = new OpeningMemory();
-const controller = new Controller(worker, render, undefined, (move, human) => {
+const initialGame = gameFromHash(location.hash) ?? new Game();
+const controller = new Controller(worker, render, initialGame, (move, human) => {
   if (!document.hidden) sounds.play(soundForMove(move, human));
 }, openingMemory);
 for (const event of ['pointerdown', 'pointerup', 'keydown']) {
@@ -124,6 +126,8 @@ promotion.addEventListener('close', () => {
 });
 
 function render(): void {
+  const hash = gameHash(game);
+  if (location.hash !== hash) history.replaceState(history.state, '', location.pathname + location.search + hash);
   const canMove = controller.ready && !controller.error && controller.visible && game.humanTurn && !game.over;
   const last = game.history[game.cursor - 1];
   const boardKey = `${game.chess.fen()}:${game.human}:${canMove}`;
@@ -237,6 +241,9 @@ worker.onmessageerror = () => controller.fail('The engine sent an unreadable mes
 document.addEventListener('visibilitychange', () => controller.visibility(!document.hidden));
 window.addEventListener('pagehide', () => controller.visibility(false));
 window.addEventListener('pageshow', () => controller.visibility(!document.hidden));
+window.addEventListener('hashchange', () => {
+  if (location.hash !== gameHash(game)) location.reload();
+});
 controller.visible = !document.hidden;
 worker.postMessage({ type: 'init', assetBase: new URL(`${import.meta.env.BASE_URL}engine/`, document.baseURI).href });
 const loadTimeout = setTimeout(() => {

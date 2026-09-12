@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { Chess, DEFAULT_POSITION } from 'chess.js';
+import { Game } from '../../src/game';
+import { gameHash } from '../../src/share';
 
 async function ready(page: Page): Promise<void> {
   await page.goto('./');
@@ -122,6 +124,26 @@ test('loads at a repository subpath, plays on the board, and replies in one seco
   expect(errors).toEqual([]);
   await expect(page.locator('piece.anim')).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath('talbot.png'), fullPage: true });
+});
+
+test('loads and continuously updates a self-contained share URL', async ({ page }) => {
+  const shared = new Game();
+  ['e2e4', 'e7e5'].forEach(move => shared.play(move));
+  const originalHash = gameHash(shared);
+  await page.goto(`./${originalHash}`);
+  await expect(page.getByRole('status')).toHaveText('Your move');
+  await expect(page.locator('#board')).toHaveAttribute('data-fen', shared.chess.fen());
+  await expect(page).toHaveURL(new RegExp(`${originalHash}$`));
+
+  await page.locator('#undo').click();
+  await expect(page.locator('#board')).toHaveAttribute('data-fen', DEFAULT_POSITION);
+  await expect(page).not.toHaveURL(/#1/);
+  await page.locator('#redo').click();
+  await expect(page).toHaveURL(new RegExp(`${originalHash}$`));
+
+  await move(page, 'g1', 'f3');
+  await expect(page.getByRole('status')).toHaveText('Talbot is thinking');
+  await expect.poll(() => new URL(page.url()).hash).not.toBe(originalHash);
 });
 
 test('shows committed opening, sacrifice, and Tal mate commentary', async ({ page }) => {

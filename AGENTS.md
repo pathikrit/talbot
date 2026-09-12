@@ -120,15 +120,20 @@ run. Opening `index.html` as a file is not supported; workers/WASM need HTTP(S).
   one-second reply. Further navigation cancels it; there is no Continue button.
 - Checkmate, stalemate, insufficient material, threefold repetition, and the
   fifty-move rule end the game. Draws are automatic in v1, not claim-based.
-- A page refresh starts over. Games are not stored. Once the engine has loaded,
+- The URL fragment updates in place as the game changes. It contains a versioned,
+  base64url-encoded header plus one legal-move index byte per visible ply, so any
+  copied URL restores the board, complete repetition/capture history, human side,
+  and resignation/agreement result without a server. Undo shares only the visible
+  cursor, not its hidden redo continuation. A bare URL starts a fresh White game;
+  malformed or unsupported fragments are discarded. Once the engine has loaded,
   ongoing play needs no network, but offline reload/PWA installation is not
-implemented.
+  implemented.
 
 ## What “sacrifice mode” means
 
 Patricia has **no upstream aggression slider**. Its style is built into its
 evaluation and networks. Talbot uses full-strength search (`Skill_Level=21`,
-one thread, 32 MB hash, MultiPV 50 by default), with an **experimental modification**:
+one thread, 32 MB hash, MultiPV 100 by default), with an **experimental modification**:
 retain the Feanor sacrifice network for non-endgame search roots instead of
 switching networks after depth six. Below Patricia's original material threshold
 it still uses Finarfin, the endgame network. All three upstream networks are
@@ -148,12 +153,12 @@ the controller; rendering every candidate can starve pointer events during searc
 
 `src/engine/sacrifice.ts` chooses the largest verified net material offer within
 100cp (one pawn) of the best candidate by default, breaking size ties by better evaluation
-and then MultiPV order. Search requests 50 distinct root moves, capped
+and then MultiPV order. Search requests 100 distinct root moves, capped
 at the legal move count. Timed play spends 45% of the available search window on
 that broad pass, cheaply ranks sacrifice potential through the next four Talbot
-turns in each PV, then searches up to 50 finalists with Patricia's remaining time.
+turns in each PV, then searches up to 100 finalists with Patricia's remaining time.
 The finalists always include the broad best move and any eligible chosen book
-move. Pondering remains an unrestricted long-running 50-line search to warm TT.
+move. Pondering remains an unrestricted long-running 100-line search to warm TT.
 Only the latest complete common-depth batch (depth >= 4) from each stage is
 comparable. Partial newer iterations do not replace it. Mate scores disable
 selection; an unavailable fallback move, incomplete batch, or no qualifying
