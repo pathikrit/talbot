@@ -7,6 +7,8 @@ export const SELECTOR_RESERVE_MS = 100;
 const values: Record<PieceSymbol, number> = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 0 };
 const uci = (move: Move) => move.from + move.to + (move.promotion ?? '');
 const FUTURE_SACRIFICE_MOVES = 4;
+const DEFENSIVE_STYLE_LIMIT_CP = 25;
+const DESPERATE_SCORE_CP = -300;
 
 /** Keep only complete, distinct, common-depth sets, never an in-flight mixture. */
 export class CandidateSet {
@@ -231,6 +233,12 @@ export function avoidDraw(position: Chess, candidates: CandidateSet, chosen: Ana
 }
 
 /** Shared safety gate for book moves and material-sacrifice selection. */
+export function styleLossLimit(bestScore: number): number {
+  if (bestScore <= DESPERATE_SCORE_CP) return 0;
+  if (bestScore <= -100) return Math.min(DEFENSIVE_STYLE_LIMIT_CP, settings.maxSacrificeLossCp);
+  return settings.maxSacrificeLossCp;
+}
+
 export function eligibleCandidates(candidates: CandidateSet, fallback: string): Analysis[] {
   const batch = candidates.complete;
   // Mate scores aren't centipawns. Preserve engine mating decisions, including
@@ -238,7 +246,7 @@ export function eligibleCandidates(candidates: CandidateSet, fallback: string): 
   if (candidates.latestBest?.score.kind === 'mate' || !batch.length || batch[0].depth < 4
     || batch.some(info => info.score.kind !== 'cp') || !batch.some(info => info.pv[0] === fallback)) return [];
   const best = Math.max(...batch.map(info => info.score.value));
-  return batch.filter(info => best - info.score.value <= settings.maxSacrificeLossCp)
+  return batch.filter(info => best - info.score.value <= styleLossLimit(best))
     .sort((a, b) => b.score.value - a.score.value || a.multipv - b.multipv);
 }
 

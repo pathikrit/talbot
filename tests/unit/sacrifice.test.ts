@@ -1,7 +1,8 @@
 import { Chess } from 'chess.js';
 import { describe, expect, it } from 'vitest';
-import { avoidDraw, CandidateSet, chooseSacrifice, drawsInLine, lineSacrificeSize, offersSacrifice, sacrificeDetail,
-  sacrificePotential, sacrificeSize, shortlistCandidates } from '../../src/engine/sacrifice';
+import { avoidDraw, CandidateSet, chooseSacrifice, drawsInLine, eligibleCandidates, lineSacrificeSize,
+  offersSacrifice, sacrificeDetail, sacrificePotential, sacrificeSize, shortlistCandidates,
+  styleLossLimit } from '../../src/engine/sacrifice';
 import { parseInfo } from '../../src/engine/protocol';
 import { settings } from '../../src/settings';
 
@@ -52,6 +53,16 @@ describe('lasting material offers', () => {
 });
 
 describe('candidate ranking', () => {
+  it('tightens the style budget when worse and plays only the best when clearly losing', () => {
+    expect(styleLossLimit(-99)).toBe(settings.maxSacrificeLossCp);
+    expect(styleLossLimit(-100)).toBe(25);
+    expect(styleLossLimit(-300)).toBe(0);
+    const set = new CandidateSet(3);
+    set.add(info(1, 'h1g1', -100)); set.add(info(2, 'e3e4', -125)); set.add(info(3, 'h1h2', -126));
+    expect(eligibleCandidates(set, 'h1g1').map(row => row.pv[0])).toEqual(['h1g1', 'e3e4']);
+    set.add(info(1, 'h1g1', -300, 8)); set.add(info(2, 'e3e4', -301, 8)); set.add(info(3, 'h1h2', -302, 8));
+    expect(eligibleCandidates(set, 'h1g1').map(row => row.pv[0])).toEqual(['h1g1']);
+  });
   it('keeps quiet book preparation unless a verified sacrifice qualifies', () => {
     const set = new CandidateSet(2);
     set.add(info(1, 'h1g1', 50));

@@ -174,6 +174,12 @@ editing in dev; rebuild/redeploy for GitHub Pages. No runtime configuration fetc
 or UI controls are added. Keep settings.json in the source-package allowlist.
 Wider MultiPV reduces search depth within the unchanged one-second budget.
 
+The configured 75cp value is an absolute ceiling, not a target spent every move.
+When Patricia's best score is at most -100cp, all book and sacrifice alternatives
+are restricted to 25cp; at -300cp or worse Talbot plays only a best-scoring
+searched move. Mate scores already bypass styling entirely. This prevents repeated
+flair from compounding a strategically bad position.
+
 Acceptance is checked separately from the main PV: **declined offers count**.
 At the root and each of the next three Talbot turns in the PV, require a newly
 created legal capture that leaves Talbot at least a pawn worse in net material
