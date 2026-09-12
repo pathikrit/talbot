@@ -229,17 +229,18 @@ a plan that was not played.
 
 ### Opening repertoire
 
-`book/opening-book.json` is the sole runtime opening book: 471 legal lines
-in 22 explicitly side-tagged families, compiled offline from the pinned Lichess
-and permitted eco.json records. Only source names containing "gambit" or "trap"
-(case-insensitive, including countergambits) qualify, and they must also match
-the reviewed family allowlist. Ordinary opening families are excluded. It
-includes Alien, Evans, King's, Queen's, Stafford, and named traps.
+`book/opening-book.json` is the sole runtime opening book: 1,502 legal lines
+in 1,008 families, compiled offline from the pinned Lichess and permitted eco.json
+records. Every permitted legal source name containing "gambit", "trap", or
+"attack" (case-insensitive) qualifies; ordinary names are excluded. The reviewed
+family allowlist retains its explicit playing side and weight. Otherwise each
+exact source name becomes an automatic family available to both sides, ensuring
+the keyword rule has no silent omissions. The book format version is 2.
 The initial draw selects a distinct move weighted by its highest-weight compatible
 family, then a weighted family within that move, then a line. Summing family
 weights per move would let the many e4/...e5 families crowd out other responses.
 Duplicate records do not increase family probability; the configured weights
-apply only among eligible gambit/trap families. This applies to both colors.
+apply only among eligible gambit/trap/attack families. This applies to both colors.
 Choose once, on the first available engine turn within the first four plies.
 After that, follow that exact line, not a new random branch every move. Compatible
 same-position transpositions are supported without rewinding along the line.
@@ -281,9 +282,9 @@ Lichess is CC0. From MIT eco.json retain only eco_js and CC0 eco_tsv records;
 strip aliases and omit imports from other differently licensed sources even
 from archived compiler inputs. book/provenance.json records snapshot hashes,
 source revisions, excluded origins, rejected PGNs and per-line attribution.
-The explicit family allowlist in book/families.json identifies the gambit/trap
-playing side; do not auto-enable every named trap for both sides. Unknown or
-ambiguous families stay excluded. Keep book/ in corresponding-source packaging,
+The explicit family allowlist in book/families.json identifies known playing
+sides and custom weights. Unmatched keyword names are intentionally generated as
+`both`-side families. Keep book/ in corresponding-source packaging,
 ship both license texts in public/licenses, and leave README edits to the user.
 
 ## Browser engine architecture

@@ -44,11 +44,10 @@ function position(moves: string[] = []) {
 }
 
 describe('compiled book', () => {
-  it('contains only named gambits and traps, with no ordinary opening families', () => {
-    for (const line of data.lines) expect(line.name).toMatch(/gambit|trap/i);
-    for (const id of ['italian', 'sicilian', 'french']) {
-      expect(data.families.some(family => family.id === id)).toBe(false);
-    }
+  it('contains every class of named gambit, trap and attack without ordinary openings', () => {
+    for (const line of data.lines) expect(line.name).toMatch(/gambit|trap|attack/i);
+    expect(data.lines.some(line => /attack/i.test(line.name))).toBe(true);
+    expect(data.families.some(family => family.side === 'both')).toBe(true);
   });
   it('contains legal, position-indexed lines with explicit playing sides', () => {
     expect(data.lines.length).toBeGreaterThan(100);
@@ -56,13 +55,13 @@ describe('compiled book', () => {
     for (const line of data.lines) {
       const chess = new Chess();
       expect(line.path.length).toBe(line.moves.length);
-      expect(data.families.find(family => family.id === line.family)?.side).toMatch(/^[wb]$/);
+      expect(data.families.find(family => family.id === line.family)?.side).toMatch(/^(?:w|b|both)$/);
       line.moves.forEach((move, ply) => {
         expect(data.positions[line.path[ply]]).toBe(openingKey(chess));
         chess.move(move);
       });
     }
-    for (const family of data.families) expect(family.label).toMatch(/(?:gambit|trap|attack)$/i);
+    for (const family of data.families) expect(family.label).toMatch(/gambit|trap|attack/i);
     for (const id of ['alien', 'evans', 'kings', 'queens', 'stafford', 'mortimer', 'noahs-ark']) {
       expect(data.families.some(family => family.id === id)).toBe(true);
     }
@@ -84,7 +83,7 @@ describe('initial random choice then committed repertoire', () => {
     }
     expect(counts).toEqual({ kings: 4, queens: 5, italian: 1 });
   });
-  it('selects only gambit/trap book replies even when ordinary alternatives are searched', () => {
+  it('selects only gambit/trap/attack book replies even when alternatives are searched', () => {
     const { chess, request } = position(['e2e4']);
     const set = candidates(['e7e5', 'c7c5', 'e7e6']);
     const book = new OpeningBook(data);
@@ -94,10 +93,11 @@ describe('initial random choice then committed repertoire', () => {
       const chosen = book.choose(chess, request, set, 'e7e5', undefined, () => draws.shift()!)!;
       const move = chosen.analysis.pv[0];
       counts[move] = (counts[move] ?? 0) + 1;
-      expect(data.families.find(f => f.id === data.lines.find(l => l.id === chosen.lineId)!.family)!.side).toBe('b');
+      expect(data.lines.find(line => line.id === chosen.lineId)!.name).toMatch(/gambit|trap|attack/i);
     }
-    expect(counts).toEqual({ e7e5: 70 });
-    expect(book.choose(chess, request, candidates(['c7c5', 'e7e6']), 'c7c5')).toBeUndefined();
+    expect(Object.keys(counts).every(move => ['e7e5', 'c7c5', 'e7e6'].includes(move))).toBe(true);
+    expect(Object.keys(counts).length).toBeGreaterThan(1);
+    expect(book.choose(chess, request, candidates(['c7c5', 'e7e6']), 'c7c5')).toBeDefined();
   });
   it('downweights a recently repeated move, family and exact line', () => {
     const book = new OpeningBook(fixture());

@@ -7,6 +7,8 @@ import { Chess } from 'chess.js';
 
 const sources = JSON.parse(readFileSync('book/sources.json', 'utf8'));
 const families = JSON.parse(readFileSync('book/families.json', 'utf8'));
+const familyCatalog = [...families];
+const automaticFamilies = new Map();
 const download = process.argv.includes('--download');
 const check = process.argv.includes('--check');
 if (download && check) throw new Error('Use --download or --check, not both.');
@@ -63,13 +65,7 @@ const merged = new Map();
 const rejected = [];
 for (const row of rows) {
   if (typeof row.name !== 'string' || typeof row.moves !== 'string') continue;
-  // The runtime repertoire is exclusively named gambits and traps. Keep the
-  // side-reviewed family allowlist as well: a name alone cannot identify which
-  // army offers the gambit or sets the trap.
-  if (!/gambit|trap/i.test(row.name)) continue;
-  const family = families.find(f => new RegExp(f.pattern, 'i').test(row.name)
-    && (!f.exclude || !new RegExp(f.exclude, 'i').test(row.name)));
-  if (!family) continue;
+  if (!/gambit|trap|attack/i.test(row.name)) continue;
   // eco.json aggregates sources with different terms. Include its MIT original
   // records and its CC0 Lichess records; do not relicense third-party imports.
   if (!['eco_tsv', 'eco_js'].includes(row.origin)) { excludedOrigins.add(row.origin); continue; }
@@ -78,6 +74,18 @@ for (const row of rows) {
   catch { rejected.push({ source: row.source, name: row.name, reason: 'illegal PGN' }); continue; }
   const history = chess.history({ verbose: true });
   if (!history.length || history.length > 40) continue;
+  let family = families.find(f => new RegExp(f.pattern, 'i').test(row.name)
+    && (!f.exclude || !new RegExp(f.exclude, 'i').test(row.name)));
+  if (!family) {
+    const id = `auto-${digest(row.name).slice(0, 16)}`;
+    family = automaticFamilies.get(id);
+    if (!family) {
+      family = { id, label: row.name, side: 'both',
+        weight: /trap/i.test(row.name) ? 5 : /gambit/i.test(row.name) ? 4 : 3 };
+      automaticFamilies.set(id, family);
+      familyCatalog.push(family);
+    }
+  }
   const moves = history.map(move => move.from + move.to + (move.promotion ?? ''));
   const positions = history.map(move => key(new Chess(move.before)));
   const signature = family.id + ':' + moves.join(' ');
@@ -102,8 +110,8 @@ const positions = [...new Set(lines.flatMap(line => line.positions))].sort();
 const positionIds = new Map(positions.map((fen, id) => [fen, id]));
 const used = new Set(lines.map(line => line.family));
 const book = {
-  version: 1,
-  families: families.filter(f => used.has(f.id)).map(({ id, side, weight, label }) => ({ id, side, weight, label })),
+  version: 2,
+  families: familyCatalog.filter(f => used.has(f.id)).map(({ id, side, weight, label }) => ({ id, side, weight, label })),
   positions,
   lines: lines.map(({ sources: attribution, positions: path, ...line }) => ({
     ...line, path: path.map(fen => positionIds.get(fen)),
@@ -111,7 +119,7 @@ const book = {
 };
 const report = {
   sources, inputs, excludedOrigins: [...excludedOrigins].sort(), rejected,
-  families: families.map(f => ({ id: f.id, label: f.label, side: f.side,
+  families: familyCatalog.map(f => ({ id: f.id, label: f.label, side: f.side,
     lines: lines.filter(line => line.family === f.id).length })),
   attribution: lines.map(({ id, sources }) => ({ id, sources })),
 };

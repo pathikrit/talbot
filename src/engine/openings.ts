@@ -40,7 +40,7 @@ export class OpeningBook {
     for (const line of book.lines) {
       const side = this.families.get(line.family)?.side;
       line.path.forEach((position, ply) => {
-        if (book.positions[position].split(' ')[1] !== side) return;
+        if (side !== 'both' && book.positions[position].split(' ')[1] !== side) return;
         const families = this.index.get(position) ?? new Map<string, Map<string, BookLine[]>>();
         const moves = families.get(line.family) ?? new Map<string, BookLine[]>();
         const lines = moves.get(line.moves[ply]) ?? [];
@@ -62,7 +62,8 @@ export class OpeningBook {
     if (!eligible.size) return;
     if (lineId !== undefined) {
       const line = this.lines.get(lineId);
-      if (!line || this.families.get(line.family)?.side !== position.turn()) return;
+      const side = line && this.families.get(line.family)?.side;
+      if (!line || (side !== 'both' && side !== position.turn())) return;
       // A compatible transposition is OK, but never rewind to an earlier part
       // of a line or introduce random branches after committing to it.
       const ply = line.path.indexOf(positionId, request.moves.length);
@@ -75,7 +76,8 @@ export class OpeningBook {
     const choices = [...(this.index.get(positionId) ?? [])].map(([id, moves]) => ({
       family: this.families.get(id)!,
       moves: [...moves].filter(([move]) => eligible.has(move)),
-    })).filter(choice => choice.moves.length && choice.family.side === position.turn());
+    })).filter(choice => choice.moves.length
+      && (choice.family.side === 'both' || choice.family.side === position.turn()));
     if (!choices.length) return;
     const moveCounts = new Map<string, number>();
     const familyCounts = new Map<string, number>();
