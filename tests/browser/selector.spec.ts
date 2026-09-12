@@ -4,10 +4,11 @@ import { DEFAULT_POSITION } from 'chess.js';
 import type { BookData } from '../../src/engine/openings';
 
 const openingData = JSON.parse(readFileSync(new URL('../../book/opening-book.json', import.meta.url), 'utf8')) as BookData;
+const maxSacrificeLossCp = JSON.parse(readFileSync(new URL('../../settings.json', import.meta.url), 'utf8')).maxSacrificeLossCp as number;
 
 const workerAsset = readdirSync(new URL('../../dist/assets/', import.meta.url)).find(name => /^worker-.*\.js$/.test(name))!;
 
-test('the staged production worker deepens and selects a future declined sacrifice within one pawn', async ({ page }) => {
+test('the staged production worker deepens and selects a future declined sacrifice within the loss limit', async ({ page }) => {
   // Exercise the actual bundled worker/selector with deterministic Patricia
   // output; separate app tests exercise real WASM searches and timing.
   await page.route('**/harness.html', route => route.fulfill({ contentType: 'text/html', body: '<title>Worker test</title>' }));
@@ -17,7 +18,7 @@ test('the staged production worker deepens and selects a future declined sacrifi
         if (name === 'talbot_position') return 1;
         if (name === 'talbot_search' || name === 'talbot_search_moves') {
           const depth = name === 'talbot_search' ? 4 : 8;
-          print('info depth ' + depth + ' multipv 1 score cp 100 pv h1h2 a8b8');
+          print('info depth ' + depth + ' multipv 1 score cp ${maxSacrificeLossCp} pv h1h2 a8b8');
           print('info depth ' + depth + ' multipv 2 score cp 0 pv h1g1 a8b8 e3e4 b8a8');
           print('bestmove h1h2');
           return Promise.resolve();

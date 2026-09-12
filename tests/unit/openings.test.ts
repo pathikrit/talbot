@@ -4,6 +4,7 @@ import { OpeningBook, openingKey } from '../../src/engine/openings';
 import type { BookData } from '../../src/engine/openings';
 import { CandidateSet } from '../../src/engine/sacrifice';
 import { parseInfo } from '../../src/engine/protocol';
+import { settings } from '../../src/settings';
 import data from '../../book/opening-book.json';
 
 function fixture(): BookData {
@@ -123,11 +124,13 @@ describe('initial random choice then committed repertoire', () => {
     expect(choice?.analysis.pv[0]).toBe('f2f4');
     expect(choice?.lineId).toBe('kings');
   });
-  it('accepts a line at a one-pawn loss but abandons it above that', () => {
+  it('accepts a line at the configured loss limit but abandons it above that', () => {
     const { chess, request } = position(['e2e4', 'e7e5']);
     const book = new OpeningBook(fixture());
-    expect(book.choose(chess, request, candidates(['g1f3', 'f2f4'], [30, -70]), 'g1f3', 'kings')?.analysis.pv[0]).toBe('f2f4');
-    expect(book.choose(chess, request, candidates(['g1f3', 'f2f4'], [30, -71]), 'g1f3', 'kings')).toBeUndefined();
+    expect(book.choose(chess, request, candidates(['g1f3', 'f2f4'], [30, 30 - settings.maxSacrificeLossCp]),
+      'g1f3', 'kings')?.analysis.pv[0]).toBe('f2f4');
+    expect(book.choose(chess, request, candidates(['g1f3', 'f2f4'], [30, 29 - settings.maxSacrificeLossCp]),
+      'g1f3', 'kings')).toBeUndefined();
   });
   it('falls back on deviations, exhausted lines and explicit out-of-book state', () => {
     const book = new OpeningBook(fixture());

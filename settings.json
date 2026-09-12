@@ -1,4 +1,4 @@
 {
-  "maxSacrificeLossCp": 100,
+  "maxSacrificeLossCp": 75,
   "maxDrawAvoidanceLossCp": 1
 }

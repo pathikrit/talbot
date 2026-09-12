@@ -152,7 +152,7 @@ the controller; rendering every candidate can starve pointer events during searc
 ### Sacrifice selection
 
 `src/engine/sacrifice.ts` chooses the largest verified net material offer within
-100cp (one pawn) of the best candidate by default, breaking size ties by better evaluation
+75cp of the best candidate by default, breaking size ties by better evaluation
 and then MultiPV order. Search requests 100 distinct root moves, capped
 at the legal move count. Timed play spends 45% of the available search window on
 that broad pass, cheaply ranks sacrifice potential through the next four Talbot
