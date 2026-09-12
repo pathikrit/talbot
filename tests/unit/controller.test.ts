@@ -342,6 +342,26 @@ describe('search lifecycle', () => {
     expect(controller.game.cursor).toBe(2);
     expect(search().position.moves).toEqual(['e2e4', 'e7e5', 'g1f3']);
     expect(search().deadline).toBeUndefined();
+    const predicted = search().id;
+    vi.advanceTimersByTime(1499);
+    expect(search().id).toBe(predicted);
+    vi.advanceTimersByTime(1);
+    expect(search().id).not.toBe(predicted);
+    expect(search().position.moves).toEqual(['e2e4', 'e7e5']);
+    expect(search().deadline).toBeUndefined();
+  });
+  it('cancels ponder broadening when the human moves first', () => {
+    controller.play('e2e4');
+    controller.receive({ type: 'info', id: search().id,
+      analysis: parseInfo('info depth 7 score cp 10 pv e7e5 g1f3 b8c6')! });
+    controller.receive({ type: 'bestmove', id: search().id, move: 'e7e5' });
+    vi.advanceTimersByTime(1000);
+    controller.play('d2d4');
+    const actual = search().id;
+    vi.advanceTimersByTime(2000);
+    expect(search().id).toBe(actual);
+    expect(search().position.moves).toEqual(['e2e4', 'e7e5', 'd2d4']);
+    expect(search().deadline).toBeDefined();
   });
   it('ignores a stale reply and stale info after undo', () => {
     controller.play('e2e4'); const id = search().id;

@@ -11,6 +11,7 @@ export interface EnginePort { postMessage(message: EngineRequest): void }
 export interface OpeningMemoryPort { recent(): RecentOpening[]; remember(entry: RecentOpening): void }
 export type EngineMode = 'loading' | 'thinking' | 'pondering' | 'paused' | 'idle' | 'error';
 const noOpeningMemory: OpeningMemoryPort = { recent: () => [], remember: () => {} };
+const PREDICTED_PONDER_MS = 1500;
 
 export class Controller {
   readonly game: Game;
@@ -30,6 +31,7 @@ export class Controller {
   private deadline = 0;
   private moveTimer?: ReturnType<typeof setTimeout>;
   private watchdog?: ReturnType<typeof setTimeout>;
+  private ponderTimer?: ReturnType<typeof setTimeout>;
   private openings: Partial<Record<Color, string | null>>[] = [{}];
 
   constructor(private engine: EnginePort, private changed: () => void, game = new Game(),
@@ -96,6 +98,7 @@ export class Controller {
     this.revision++;
     clearTimeout(this.moveTimer);
     clearTimeout(this.watchdog);
+    clearTimeout(this.ponderTimer);
     this.engine.postMessage({ type: 'stop' });
   }
 
@@ -150,6 +153,15 @@ export class Controller {
         opening: this.openings[game.cursor]?.[game.chess.turn()],
         recentOpenings: this.openingMemory.recent(),
       });
+      if (game.humanTurn && this.speculative) {
+        const revision = this.revision;
+        this.ponderTimer = setTimeout(() => {
+          if (revision !== this.revision || !this.visible || this.error
+            || !game.humanTurn || game.over) return;
+          this.prediction = undefined;
+          this.sync(true);
+        }, PREDICTED_PONDER_MS);
+      }
       if (!game.humanTurn) {
         // Do not leave the user waiting indefinitely after a worker crash/hang.
         this.watchdog = setTimeout(() => this.fail('The engine did not respond. Reload the page to retry.'), 5000);

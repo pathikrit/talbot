@@ -158,7 +158,10 @@ at the legal move count. Timed play spends 45% of the available search window on
 that broad pass, cheaply ranks sacrifice potential through the next four Talbot
 turns in each PV, then searches up to 100 finalists with Patricia's remaining time.
 The finalists always include the broad best move and any eligible chosen book
-move. Pondering remains an unrestricted long-running 100-line search to warm TT.
+move. Pondering gives Patricia's predicted human reply 1.5 seconds, then, if the
+human is still thinking, restarts from the actual position as an unrestricted
+long-running 100-line search. This retains a deep prediction hit while warming
+TT across alternative human moves.
 Only the latest complete common-depth batch (depth >= 4) from each stage is
 comparable. Partial newer iterations do not replace it. Mate scores disable
 selection; an unavailable fallback move, incomplete batch, or no qualifying
